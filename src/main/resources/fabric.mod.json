@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "simplefps",
+	"version": "${version}",
+	"name": "SimpleFPS",
+	"description": "A lightweight, movable FPS counter with customizable text color, size, and visibility.",
+	"authors": [
+		"Partacus-SPQR"
+	],
+	"contact": {
+		"homepage": "https://github.com/Partacus-SPQR/SimpleFPS",
+		"sources": "https://github.com/Partacus-SPQR/SimpleFPS"
+	},
+	"license": "MIT",
+	"icon": "assets/simplefps/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"com.simplefps.SimpleFPSClient"
+		],
+		"modmenu": [
+			"com.simplefps.config.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+	],
+	"depends": {
+		"fabricloader": ">=0.16.9",
+		"minecraft": "~1.21.10",
+		"java": ">=21",
+		"fabric-api": "*",
+		"cloth-config": ">=20.0.0"
+	},
+	"recommends": {
+		"modmenu": "*"
+	}
+}
