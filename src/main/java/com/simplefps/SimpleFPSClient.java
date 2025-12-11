@@ -86,7 +86,13 @@ public class SimpleFPSClient implements ClientModInitializer {
 			
 			while (configKeyBinding.wasPressed()) {
 				if (client.currentScreen == null) {
-					client.setScreen(com.simplefps.config.ModConfigScreen.createConfigScreen(null));
+					// Try to use Cloth Config screen if available, otherwise fallback
+					try {
+						Class.forName("me.shedaniel.clothconfig2.api.ConfigBuilder");
+						client.setScreen(com.simplefps.config.ModConfigScreen.createConfigScreen(null));
+					} catch (Throwable e) {
+						client.setScreen(new com.simplefps.config.SimpleFPSConfigScreen(null));
+					}
 				}
 			}
 			

@@ -121,10 +121,10 @@ public class ColorPickerScreen extends Screen {
 		});
 		addDrawableChild(hexField);
 		
-		// Apply button - calls the callback which handles screen transition
+		// Apply button - calls the callback and returns to parent
 		addDrawableChild(ButtonWidget.builder(Text.literal("Apply"), button -> {
 			onColorSelected.accept(getHexColor());
-			// Don't call close() - the callback handles screen transition
+			close(); // Return to parent screen after applying
 		}).dimensions(centerX - 55, height - 30, 50, 20).build());
 		
 		// Cancel button

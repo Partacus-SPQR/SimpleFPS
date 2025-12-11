@@ -2,6 +2,26 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
+## [1.1.0] - 2024-12-10
+
+### Changed
+- **Minecraft 1.21.11** - Updated to support Minecraft 1.21.11
+- **Cloth Config & Mod Menu are now optional** - Only Fabric API is required
+- Updated Fabric Loader to 0.18.2
+- Updated Fabric API to 0.139.4+1.21.11
+- Updated Loom to 1.14-SNAPSHOT
+- Updated Gradle to 9.2.1
+
+### Added
+- **Built-in Config Screen** - Native Minecraft config screen with sliders, tooltips, and reset buttons (used when Cloth Config is not installed)
+- **Config Keybind** - Opens Cloth Config screen if installed, otherwise opens built-in config
+- Automatic detection of Cloth Config at runtime
+
+### Technical
+- Cloth Config changed from `modImplementation` to `modCompileOnly`
+- Mod Menu integration works with or without Cloth Config
+- All keybinds remain unbound by default
+
 ## [1.0.0] - 2024-12-06
 
 ### Added
