@@ -1,6 +1,7 @@
 package com.simplefps.config;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.option.KeybindsScreen;
@@ -38,6 +39,11 @@ public class SimpleFPSConfigScreen extends Screen {
 	private int maxScrollOffset = 0;
 	private static final int HEADER_HEIGHT = 28;
 	private static final int FOOTER_HEIGHT = 58;
+	
+	// Scrollbar interaction
+	private static final int SCROLLBAR_WIDTH = 6;
+	private boolean isDraggingScrollbar = false;
+	private int scrollbarDragOffset = 0;
 	
 	// All config rows for scrolling and rendering
 	private final List<ConfigRow> configRows = new ArrayList<>();
@@ -493,6 +499,74 @@ public class SimpleFPSConfigScreen extends Screen {
 			return true;
 		}
 		return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
+	}
+	
+	@Override
+	public boolean mouseClicked(Click click, boolean doubleClick) {
+		double mouseX = click.x();
+		double mouseY = click.y();
+		int button = click.button();
+		
+		// Check if clicking on the scrollbar track area
+		if (button == 0 && maxScrollOffset > 0) {
+			int scrollbarX = this.width - SCROLLBAR_WIDTH - 2;
+			int scrollbarTrackTop = HEADER_HEIGHT;
+			int scrollbarTrackBottom = this.height - FOOTER_HEIGHT;
+			
+			if (mouseX >= scrollbarX && mouseX <= this.width - 2 &&
+				mouseY >= scrollbarTrackTop && mouseY <= scrollbarTrackBottom) {
+				
+				// Calculate scrollbar thumb position and size
+				int trackHeight = scrollbarTrackBottom - scrollbarTrackTop;
+				int thumbHeight = Math.max(20, trackHeight * trackHeight / (maxScrollOffset + trackHeight));
+				int thumbY = scrollbarTrackTop + (int)((trackHeight - thumbHeight) * ((float)scrollOffset / maxScrollOffset));
+				
+				if (mouseY >= thumbY && mouseY <= thumbY + thumbHeight) {
+					// Clicked on thumb - start dragging
+					isDraggingScrollbar = true;
+					scrollbarDragOffset = (int)(mouseY - thumbY);
+				} else {
+					// Clicked on track - jump to position
+					int clickOffset = (int)mouseY - scrollbarTrackTop - thumbHeight / 2;
+					float scrollPercent = (float)clickOffset / (trackHeight - thumbHeight);
+					scrollOffset = (int)(scrollPercent * maxScrollOffset);
+					scrollOffset = Math.max(0, Math.min(maxScrollOffset, scrollOffset));
+					isDraggingScrollbar = true;
+					scrollbarDragOffset = thumbHeight / 2;
+				}
+				return true;
+			}
+		}
+		return super.mouseClicked(click, doubleClick);
+	}
+	
+	@Override
+	public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+		int button = click.button();
+		double mouseY = click.y();
+		
+		if (isDraggingScrollbar && button == 0 && maxScrollOffset > 0) {
+			int scrollbarTrackTop = HEADER_HEIGHT;
+			int scrollbarTrackBottom = this.height - FOOTER_HEIGHT;
+			int trackHeight = scrollbarTrackBottom - scrollbarTrackTop;
+			int thumbHeight = Math.max(20, trackHeight * trackHeight / (maxScrollOffset + trackHeight));
+			
+			// Calculate new scroll position based on mouse Y
+			int thumbY = (int)mouseY - scrollbarDragOffset - scrollbarTrackTop;
+			float scrollPercent = (float)thumbY / (trackHeight - thumbHeight);
+			scrollOffset = (int)(scrollPercent * maxScrollOffset);
+			scrollOffset = Math.max(0, Math.min(maxScrollOffset, scrollOffset));
+			return true;
+		}
+		return super.mouseDragged(click, deltaX, deltaY);
+	}
+	
+	@Override
+	public boolean mouseReleased(Click click) {
+		if (click.button() == 0) {
+			isDraggingScrollbar = false;
+		}
+		return super.mouseReleased(click);
 	}
 	
 	@Override

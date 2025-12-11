@@ -778,6 +778,102 @@ if (tooltip != null) {
 }
 ```
 
+### Interactive Scrollbar (Click & Drag)
+
+**⚠️ RECOMMENDED: Make your scrollbar interactive!**
+
+Users expect to click/drag the scrollbar, not just use the mouse wheel. Here's how to implement it:
+
+**Add scrollbar tracking fields:**
+```java
+// Scrollbar interaction state
+private static final int SCROLLBAR_WIDTH = 6;
+private boolean isDraggingScrollbar = false;
+private int scrollbarDragOffset = 0;
+```
+
+**Implement mouse click for scrollbar (MC 1.21.11+ uses Click class):**
+```java
+@Override
+public boolean mouseClicked(Click click, boolean doubleClick) {
+    double mouseX = click.x();
+    double mouseY = click.y();
+    int button = click.button();
+    
+    // Check if clicking on the scrollbar track area
+    if (button == 0 && maxScrollOffset > 0) {
+        int scrollbarX = this.width - SCROLLBAR_WIDTH - 2;
+        int scrollbarTrackTop = HEADER_HEIGHT;
+        int scrollbarTrackBottom = this.height - FOOTER_HEIGHT;
+        
+        if (mouseX >= scrollbarX && mouseX <= this.width - 2 &&
+            mouseY >= scrollbarTrackTop && mouseY <= scrollbarTrackBottom) {
+            
+            // Calculate scrollbar thumb position and size
+            int trackHeight = scrollbarTrackBottom - scrollbarTrackTop;
+            int thumbHeight = Math.max(20, trackHeight * trackHeight / (maxScrollOffset + trackHeight));
+            int thumbY = scrollbarTrackTop + (int)((trackHeight - thumbHeight) * ((float)scrollOffset / maxScrollOffset));
+            
+            if (mouseY >= thumbY && mouseY <= thumbY + thumbHeight) {
+                // Clicked on thumb - start dragging
+                isDraggingScrollbar = true;
+                scrollbarDragOffset = (int)(mouseY - thumbY);
+            } else {
+                // Clicked on track - jump to position
+                int clickOffset = (int)mouseY - scrollbarTrackTop - thumbHeight / 2;
+                float scrollPercent = (float)clickOffset / (trackHeight - thumbHeight);
+                scrollOffset = (int)(scrollPercent * maxScrollOffset);
+                scrollOffset = Math.max(0, Math.min(maxScrollOffset, scrollOffset));
+                isDraggingScrollbar = true;
+                scrollbarDragOffset = thumbHeight / 2;
+            }
+            return true;
+        }
+    }
+    return super.mouseClicked(click, doubleClick);
+}
+```
+
+**Implement mouse drag for scrollbar:**
+```java
+@Override
+public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+    int button = click.button();
+    double mouseY = click.y();
+    
+    if (isDraggingScrollbar && button == 0 && maxScrollOffset > 0) {
+        int scrollbarTrackTop = HEADER_HEIGHT;
+        int scrollbarTrackBottom = this.height - FOOTER_HEIGHT;
+        int trackHeight = scrollbarTrackBottom - scrollbarTrackTop;
+        int thumbHeight = Math.max(20, trackHeight * trackHeight / (maxScrollOffset + trackHeight));
+        
+        // Calculate new scroll position based on mouse Y
+        int thumbY = (int)mouseY - scrollbarDragOffset - scrollbarTrackTop;
+        float scrollPercent = (float)thumbY / (trackHeight - thumbHeight);
+        scrollOffset = (int)(scrollPercent * maxScrollOffset);
+        scrollOffset = Math.max(0, Math.min(maxScrollOffset, scrollOffset));
+        return true;
+    }
+    return super.mouseDragged(click, deltaX, deltaY);
+}
+```
+
+**Release scrollbar on mouse release:**
+```java
+@Override
+public boolean mouseReleased(Click click) {
+    if (click.button() == 0) {
+        isDraggingScrollbar = false;
+    }
+    return super.mouseReleased(click);
+}
+```
+
+**Note on MC 1.21.11 API:** The `Click` class provides `x()`, `y()`, and `button()` methods. Import it with:
+```java
+import net.minecraft.client.gui.Click;
+```
+
 ---
 
 ## Part 4: Config Keybind (MANDATORY)

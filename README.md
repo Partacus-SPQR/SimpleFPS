@@ -10,7 +10,7 @@ A lightweight, customizable FPS counter mod for Minecraft (Fabric 1.21.11).
 - **Color Picker** - Built-in visual color picker for easy customization
 - **Adaptive Colors** - Optional color-coding based on FPS thresholds
 - **Live Preview** - See changes in real-time while configuring
-- **Built-in Config Screen** - Scrollable fallback config that works without Cloth Config
+- **Built-in Config Screen** - Scrollable fallback config with draggable scrollbar
 
 ## Installation
 

@@ -7,7 +7,10 @@ All notable changes to SimpleFPS will be documented in this file.
 ### Fixed
 - **Scrollable Fallback Config** - Config screen now scrolls and adapts to any window size
 - Fixed config widgets overlapping bottom buttons on small Minecraft windows
-- Config screen now has a visible scrollbar when content exceeds visible area
+
+### Added
+- **Interactive Scrollbar** - Click to jump or drag to scroll through config options
+- Scroll indicators show when more content is available
 
 ### Changed
 - Improved widget positioning in fallback config (uses manual scroll offset)
