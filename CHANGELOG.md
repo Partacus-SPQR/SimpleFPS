@@ -2,21 +2,7 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
-## [1.1.1] - 2024-12-11
-
-### Fixed
-- **Scrollable Fallback Config** - Config screen now scrolls and adapts to any window size
-- Fixed config widgets overlapping bottom buttons on small Minecraft windows
-
-### Added
-- **Interactive Scrollbar** - Click to jump or drag to scroll through config options
-- Scroll indicators show when more content is available
-
-### Changed
-- Improved widget positioning in fallback config (uses manual scroll offset)
-- Bottom buttons (Save & Close, Key Binds, Cancel) are now fixed at the bottom
-
-## [1.1.0] - 2024-12-10
+## [1.1.0] - 2024-12-11
 
 ### Changed
 - **Minecraft 1.21.11** - Updated to support Minecraft 1.21.11
@@ -28,13 +14,21 @@ All notable changes to SimpleFPS will be documented in this file.
 
 ### Added
 - **Built-in Config Screen** - Native Minecraft config screen with sliders, tooltips, and reset buttons (used when Cloth Config is not installed)
+- **Interactive Scrollbar** - Click to jump or drag to scroll through config options
 - **Config Keybind** - Opens Cloth Config screen if installed, otherwise opens built-in config
 - Automatic detection of Cloth Config at runtime
+- Scroll indicators show when more content is available
+
+### Fixed
+- **Scrollable Fallback Config** - Config screen now scrolls and adapts to any window size
+- Fixed config widgets overlapping bottom buttons on small Minecraft windows
 
 ### Technical
 - Cloth Config changed from `modImplementation` to `modCompileOnly`
 - Mod Menu integration works with or without Cloth Config
 - All keybinds remain unbound by default
+- Improved widget positioning in fallback config (uses manual scroll offset)
+- Bottom buttons (Save & Close, Key Binds, Cancel) are now fixed at the bottom
 
 ## [1.0.0] - 2024-12-06
 
