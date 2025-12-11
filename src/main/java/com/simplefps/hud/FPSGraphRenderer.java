@@ -78,12 +78,14 @@ public class FPSGraphRenderer {
 		int textHeight = 24; // Fixed height for 2 rows of text (labels + values)
 		int totalHeight = height + textHeight;
 		
-		int x = config.graphX;
-		int y = config.graphY;
-		
-		// Ensure within screen bounds
+		// Get scaled positions
 		int screenWidth = client.getWindow().getScaledWidth();
 		int screenHeight = client.getWindow().getScaledHeight();
+		
+		int x = config.getScaledGraphX(screenWidth);
+		int y = config.getScaledGraphY(screenHeight);
+		
+		// Ensure within screen bounds
 		if (x + width > screenWidth) x = screenWidth - width;
 		if (y + totalHeight > screenHeight) y = screenHeight - totalHeight;
 		if (x < 0) x = 0;

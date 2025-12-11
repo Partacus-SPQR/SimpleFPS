@@ -5,6 +5,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.util.math.Direction;
 
 public class FPSHudRenderer {
 	
@@ -42,19 +43,32 @@ public class FPSHudRenderer {
 		int fps = client.getCurrentFps();
 		
 		// Build display text
-		String fpsText = config.showLabel ? fps + " FPS" : String.valueOf(fps);
+		StringBuilder textBuilder = new StringBuilder();
+		if (config.showLabel) {
+			textBuilder.append(fps).append(" FPS");
+		} else {
+			textBuilder.append(fps);
+		}
+		
+		// Add direction if enabled
+		if (config.showDirection && client.player != null) {
+			String direction = getPlayerDirection(client);
+			textBuilder.append(" ").append(direction);
+		}
+		
+		String fpsText = textBuilder.toString();
 		
 		// Calculate text dimensions with scaling
 		float scale = config.textSize;
 		int textWidth = (int) (textRenderer.getWidth(fpsText) * scale);
 		int textHeight = (int) (textRenderer.fontHeight * scale);
 		
-		// Get position (clamped to screen bounds)
+		// Get position (scaled and clamped to screen bounds)
 		int screenWidth = client.getWindow().getScaledWidth();
 		int screenHeight = client.getWindow().getScaledHeight();
 		
-		int x = Math.max(0, Math.min(config.positionX, screenWidth - textWidth - 4));
-		int y = Math.max(0, Math.min(config.positionY, screenHeight - textHeight - 4));
+		int x = Math.max(0, Math.min(config.getScaledPositionX(screenWidth), screenWidth - textWidth - 4));
+		int y = Math.max(0, Math.min(config.getScaledPositionY(screenHeight), screenHeight - textHeight - 4));
 		
 		// Draw background if enabled
 		if (config.showBackground && config.backgroundOpacity > 0) {
@@ -107,12 +121,22 @@ public class FPSHudRenderer {
 			);
 		}
 		
-		// Show preview indicator if in preview mode
-		if (isPreview) {
-			String previewLabel = "← Drag me!";
-			int labelX = x + textWidth + 10;
-			int labelY = y + (textHeight > textRenderer.fontHeight ? y + (int)(textHeight / 2) - (textRenderer.fontHeight / 2) : y);
-			context.drawTextWithShadow(textRenderer, previewLabel, labelX, labelY, 0xFF55FF55);
-		}
+	}
+	// Note: Preview labels are handled by HudDragScreen
+	
+	/**
+	 * Gets the player's current facing direction as a single letter.
+	 */
+	private static String getPlayerDirection(MinecraftClient client) {
+		if (client.player == null) return "";
+		
+		Direction direction = client.player.getHorizontalFacing();
+		return switch (direction) {
+			case NORTH -> "N";
+			case SOUTH -> "S";
+			case EAST -> "E";
+			case WEST -> "W";
+			default -> "";
+		};
 	}
 }

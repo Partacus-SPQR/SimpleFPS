@@ -1,7 +1,6 @@
 package com.simplefps.config;
 
 import com.simplefps.SimpleFPSClient;
-import com.simplefps.hud.FPSGraphRenderer;
 import com.simplefps.hud.FPSHudRenderer;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import me.shedaniel.clothconfig2.api.ConfigCategory;
@@ -16,34 +15,33 @@ import net.minecraft.util.Formatting;
 
 public class ModConfigScreen {
 
-	public static Screen createConfigScreen(Screen parent) {
-		SimpleFPSConfig config = SimpleFPSConfig.getInstance();
+	// Flag to suppress saving when reopening from color picker
+	private static boolean skipNextSave = false;
 
+	public static Screen createConfigScreen(Screen parent) {
+		return createConfigScreen(parent, 0);
+	}
+	
+	public static Screen createConfigScreen(Screen parent, int initialTab) {
+		SimpleFPSConfig config = SimpleFPSConfig.getInstance();
+		
 		ConfigBuilder builder = ConfigBuilder.create()
 			.setParentScreen(parent)
 			.setTitle(Text.translatable("simplefps.config.title"))
 			.setTransparentBackground(true) // Allow seeing the game behind
 			.setAfterInitConsumer(screen -> {
-				// Register to render the FPS preview on top of this screen
-				ScreenEvents.afterRender(screen).register((scr, context, mouseX, mouseY, tickDelta) -> {
-					// Only render previews if they are enabled
-					if (config.enabled) {
-						FPSHudRenderer.renderFPS(context, false);
-					}
-					if (config.graphEnabled) {
-						FPSGraphRenderer.renderGraph(context, false);
-					}
-				});
-				
-				// Add a "Save" button to the screen
+				// Set the initial tab if specified
 				if (screen instanceof me.shedaniel.clothconfig2.gui.AbstractConfigScreen configScreen) {
+					if (initialTab > 0) {
+						configScreen.selectedCategoryIndex = initialTab;
+					}
+					
 					int buttonWidth = Math.min(200, (screen.width - 50 - 12) / 3);
-					int saveButtonX = screen.width / 2 - buttonWidth - 3 - buttonWidth - 6; // Left of Cancel
+					int saveButtonX = screen.width / 2 - buttonWidth - 3 - buttonWidth - 6;
 					
 					ButtonWidget saveButton = ButtonWidget.builder(
 						Text.literal("Save"),
 						button -> {
-							// Call saveAll which triggers all the save consumers, then save to file
 							configScreen.saveAll(false);
 							config.save();
 						}
@@ -51,50 +49,115 @@ public class ModConfigScreen {
 					
 					Screens.getButtons(screen).add(saveButton);
 					
-					// Add color picker buttons at the bottom left (visible area)
+					// Add color picker buttons at the bottom left
 					int pickerWidth = 85;
-					int pickerY = screen.height - 26; // Same row as other buttons
-					int pickerX = 5; // Left side of screen
+					int pickerY = screen.height - 26;
+					int pickerX = 5;
 					
 					ButtonWidget textColorPicker = ButtonWidget.builder(
-						Text.literal("Pick Text Color"),
+						Text.literal("Text Color"),
 						button -> {
-							// First save current config
-							configScreen.saveAll(false);
-							config.save();
-							// Open color picker for text color
-							MinecraftClient.getInstance().setScreen(new ColorPickerScreen(screen, config.textColor, newColor -> {
-								config.textColor = newColor;
-								config.save();
-								// Re-open config screen after selection
-								MinecraftClient.getInstance().setScreen(createConfigScreen(parent));
+							// Get CURRENT tab at click time
+							int clickedTab = configScreen.selectedCategoryIndex;
+							// Only work on tabs 0, 1, 2 (FPS, Coordinates, Biome)
+							if (clickedTab > 2) return;
+							
+							String categoryName = switch (clickedTab) {
+								case 1 -> "Coordinates";
+								case 2 -> "Biome";
+								default -> "FPS Counter";
+							};
+							
+							SimpleFPSConfig cfg = SimpleFPSConfig.getInstance();
+							String currentColor = getTextColorForCategory(cfg, categoryName);
+							final int tabToRestore = clickedTab;
+							final Screen originalParent = parent; // Capture parent explicitly
+							
+							MinecraftClient.getInstance().setScreen(new ColorPickerScreen(screen, currentColor, newColor -> {
+								SimpleFPSConfig freshConfig = SimpleFPSConfig.getInstance();
+								setTextColorForCategory(freshConfig, categoryName, newColor);
+								freshConfig.save();
+								
+								// Skip the save that happens when closing old screen
+								skipNextSave = true;
+								
+								// Create new screen with updated config values
+								Screen newScreen = createConfigScreen(originalParent, tabToRestore);
+								MinecraftClient.getInstance().setScreen(newScreen);
 							}));
 						}
 					).dimensions(pickerX, pickerY, pickerWidth, 20).build();
 					
 					ButtonWidget bgColorPicker = ButtonWidget.builder(
-						Text.literal("Pick BG Color"),
+						Text.literal("BG Color"),
 						button -> {
-							// First save current config
-							configScreen.saveAll(false);
-							config.save();
-							// Open color picker for background color
-							MinecraftClient.getInstance().setScreen(new ColorPickerScreen(screen, config.backgroundColor, newColor -> {
-								config.backgroundColor = newColor;
-								config.save();
-								// Re-open config screen after selection
-								MinecraftClient.getInstance().setScreen(createConfigScreen(parent));
+							// Get CURRENT tab at click time
+							int clickedTab = configScreen.selectedCategoryIndex;
+							// Only work on tabs 0, 1, 2 (FPS, Coordinates, Biome)
+							if (clickedTab > 2) return;
+							
+							String categoryName = switch (clickedTab) {
+								case 1 -> "Coordinates";
+								case 2 -> "Biome";
+								default -> "FPS Counter";
+							};
+							
+							SimpleFPSConfig cfg = SimpleFPSConfig.getInstance();
+							String currentColor = getBgColorForCategory(cfg, categoryName);
+							final int tabToRestore = clickedTab;
+							final Screen originalParent = parent;
+							
+							MinecraftClient.getInstance().setScreen(new ColorPickerScreen(screen, currentColor, newColor -> {
+								SimpleFPSConfig freshConfig = SimpleFPSConfig.getInstance();
+								setBgColorForCategory(freshConfig, categoryName, newColor);
+								freshConfig.save();
+								
+								// Skip the save that happens when closing old screen
+								skipNextSave = true;
+
+								Screen newScreen = createConfigScreen(originalParent, tabToRestore);
+								MinecraftClient.getInstance().setScreen(newScreen);
 							}));
 						}
 					).dimensions(pickerX + pickerWidth + 5, pickerY, pickerWidth, 20).build();
 					
 					Screens.getButtons(screen).add(textColorPicker);
 					Screens.getButtons(screen).add(bgColorPicker);
+					
+					// Register to render the FPS preview AND dynamically show/hide color picker buttons
+					ScreenEvents.afterRender(screen).register((scr, context, mouseX, mouseY, tickDelta) -> {
+						// Only render FPS preview if enabled
+						if (config.enabled) {
+							FPSHudRenderer.renderFPS(context, false);
+						}
+						
+						// Show/hide color picker buttons based on current tab
+						// Tabs 0, 1, 2 = FPS, Coordinates, Biome (have colors)
+						// Tabs 3, 4, 5 = Graph, Adaptive, Keybinds (no color pickers)
+						int currentTab = configScreen.selectedCategoryIndex;
+						boolean showColorButtons = currentTab <= 2;
+						textColorPicker.visible = showColorButtons;
+						bgColorPicker.visible = showColorButtons;
+					});
 				}
 			});
 
 		// Save changes when closing
 		builder.setSavingRunnable(() -> {
+			// Skip saving if we're just recreating the screen from color picker
+			if (skipNextSave) {
+				skipNextSave = false;
+				return;
+			}
+			
+			// Update reference resolution so positions scale correctly when window is resized
+			MinecraftClient client = MinecraftClient.getInstance();
+			if (client != null && client.getWindow() != null) {
+				config.updateReferenceResolution(
+					client.getWindow().getScaledWidth(),
+					client.getWindow().getScaledHeight()
+				);
+			}
 			config.save();
 		});
 
@@ -127,21 +190,18 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.showLabel = newValue)
 			.build());
 
-		// Appearance options - add note about color picker buttons
-		generalCategory.addEntry(entryBuilder.startTextDescription(
-			Text.literal("Color Pickers: ").formatted(Formatting.GOLD)
-				.append(Text.literal("Use the 'Pick Text Color' and 'Pick BG Color' buttons at the bottom-left of this screen.").formatted(Formatting.WHITE)))
+		generalCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.showDirection"),
+			config.showDirection)
+			.setDefaultValue(false)
+			.setTooltip(Text.translatable("simplefps.config.showDirection.tooltip"))
+			.setSaveConsumer(newValue -> config.showDirection = newValue)
 			.build());
 
-		generalCategory.addEntry(entryBuilder.startStrField(
-			Text.translatable("simplefps.config.textColor"),
-			config.textColor)
-			.setDefaultValue("#FFFFFF")
-			.setTooltip(
-				Text.translatable("simplefps.config.textColor.tooltip"),
-				Text.literal("Or use the 'Pick Text Color' button at the bottom!").formatted(Formatting.GOLD)
-			)
-			.setSaveConsumer(newValue -> config.textColor = newValue)
+		// Appearance options
+		generalCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Colors: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Use the 'Text Color' and 'BG Color' buttons at the bottom-left to pick colors.").formatted(Formatting.WHITE)))
 			.build());
 
 		generalCategory.addEntry(entryBuilder.startIntSlider(
@@ -176,17 +236,6 @@ public class ModConfigScreen {
 			.setDefaultValue(true)
 			.setTooltip(Text.translatable("simplefps.config.showBackground.tooltip"))
 			.setSaveConsumer(newValue -> config.showBackground = newValue)
-			.build());
-
-		generalCategory.addEntry(entryBuilder.startStrField(
-			Text.translatable("simplefps.config.backgroundColor"),
-			config.backgroundColor)
-			.setDefaultValue("#000000")
-			.setTooltip(
-				Text.translatable("simplefps.config.backgroundColor.tooltip"),
-				Text.literal("Use the 'BG Color' button at the bottom for a color picker!").formatted(Formatting.GOLD)
-			)
-			.setSaveConsumer(newValue -> config.backgroundColor = newValue)
 			.build());
 
 		generalCategory.addEntry(entryBuilder.startIntSlider(
@@ -225,50 +274,179 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.positionY = newValue)
 			.build());
 
-		// Adaptive Color Category
-		ConfigCategory adaptiveCategory = builder.getOrCreateCategory(
-			Text.translatable("simplefps.config.category.adaptive"));
+		// ==================== Coordinates Category (Tab 1) ====================
+		ConfigCategory coordinatesCategory = builder.getOrCreateCategory(
+			Text.translatable("simplefps.config.category.coordinates"));
 
-		adaptiveCategory.addEntry(entryBuilder.startTextDescription(
+		coordinatesCategory.addEntry(entryBuilder.startTextDescription(
 			Text.literal("Note: ").formatted(Formatting.GOLD)
-				.append(Text.literal("Enabling adaptive colors will override the custom text color. Colors change based on FPS:").formatted(Formatting.WHITE))
-				.append(Text.literal("\n  Red").formatted(Formatting.RED))
-				.append(Text.literal(" = Low FPS (at or below threshold)").formatted(Formatting.WHITE))
-				.append(Text.literal("\n  Yellow").formatted(Formatting.YELLOW))
-				.append(Text.literal(" = Medium FPS (between thresholds)").formatted(Formatting.WHITE))
-				.append(Text.literal("\n  Green").formatted(Formatting.GREEN))
-				.append(Text.literal(" = High FPS (at or above threshold)").formatted(Formatting.WHITE)))
+				.append(Text.literal("Displays your current X/Y/Z coordinates on screen.").formatted(Formatting.WHITE)))
 			.build());
 
-		adaptiveCategory.addEntry(entryBuilder.startBooleanToggle(
-			Text.translatable("simplefps.config.adaptiveColor"),
-			config.adaptiveColorEnabled)
+		coordinatesCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Colors: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Use the 'Text Color' and 'BG Color' buttons at the bottom-left to pick colors.").formatted(Formatting.WHITE)))
+			.build());
+
+		coordinatesCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.coordinatesEnabled"),
+			config.coordinatesEnabled)
 			.setDefaultValue(false)
-			.setTooltip(Text.translatable("simplefps.config.adaptiveColor.tooltip"))
-			.setSaveConsumer(newValue -> config.adaptiveColorEnabled = newValue)
+			.setTooltip(Text.translatable("simplefps.config.coordinatesEnabled.tooltip"))
+			.setSaveConsumer(newValue -> config.coordinatesEnabled = newValue)
 			.build());
 
-		adaptiveCategory.addEntry(entryBuilder.startIntField(
-			Text.translatable("simplefps.config.lowFpsThreshold"),
-			config.lowFpsThreshold)
-			.setDefaultValue(25)
-			.setMin(1)
-			.setMax(999)
-			.setTooltip(Text.translatable("simplefps.config.lowFpsThreshold.tooltip"))
-			.setSaveConsumer(newValue -> config.lowFpsThreshold = newValue)
+		int coordTextSizePercent = (int) (config.coordinatesTextSize * 100);
+		coordinatesCategory.addEntry(entryBuilder.startIntSlider(
+			Text.translatable("simplefps.config.coordinatesTextSize"),
+			coordTextSizePercent,
+			50, 200)
+			.setDefaultValue(100)
+			.setTooltip(Text.translatable("simplefps.config.coordinatesTextSize.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
+			.setSaveConsumer(newValue -> config.coordinatesTextSize = newValue / 100.0f)
 			.build());
 
-		adaptiveCategory.addEntry(entryBuilder.startIntField(
-			Text.translatable("simplefps.config.highFpsThreshold"),
-			config.highFpsThreshold)
-			.setDefaultValue(60)
-			.setMin(1)
-			.setMax(999)
-			.setTooltip(Text.translatable("simplefps.config.highFpsThreshold.tooltip"))
-			.setSaveConsumer(newValue -> config.highFpsThreshold = newValue)
+		coordinatesCategory.addEntry(entryBuilder.startIntSlider(
+			Text.translatable("simplefps.config.coordinatesTextOpacity"),
+			config.coordinatesTextOpacity,
+			0, 100)
+			.setDefaultValue(100)
+			.setTooltip(Text.translatable("simplefps.config.coordinatesTextOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
+			.setSaveConsumer(newValue -> config.coordinatesTextOpacity = newValue)
 			.build());
 
-		// FPS Graph Category
+		coordinatesCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.coordinatesShowBackground"),
+			config.coordinatesShowBackground)
+			.setDefaultValue(true)
+			.setTooltip(Text.translatable("simplefps.config.coordinatesShowBackground.tooltip"))
+			.setSaveConsumer(newValue -> config.coordinatesShowBackground = newValue)
+			.build());
+
+		coordinatesCategory.addEntry(entryBuilder.startIntSlider(
+			Text.translatable("simplefps.config.coordinatesBackgroundOpacity"),
+			config.coordinatesBackgroundOpacity,
+			0, 100)
+			.setDefaultValue(50)
+			.setTooltip(Text.translatable("simplefps.config.coordinatesBackgroundOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
+			.setSaveConsumer(newValue -> config.coordinatesBackgroundOpacity = newValue)
+			.build());
+
+		coordinatesCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Position: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Use 'Drag HUD Elements' keybind to visually reposition.").formatted(Formatting.WHITE)))
+			.build());
+
+		coordinatesCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.coordinatesX"),
+			config.coordinatesX)
+			.setDefaultValue(5)
+			.setMin(0)
+			.setMax(3840)
+			.setTooltip(Text.translatable("simplefps.config.coordinatesX.tooltip"))
+			.setSaveConsumer(newValue -> config.coordinatesX = newValue)
+			.build());
+
+		coordinatesCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.coordinatesY"),
+			config.coordinatesY)
+			.setDefaultValue(50)
+			.setMin(0)
+			.setMax(2160)
+			.setTooltip(Text.translatable("simplefps.config.coordinatesY.tooltip"))
+			.setSaveConsumer(newValue -> config.coordinatesY = newValue)
+			.build());
+
+		// ==================== Biome Category (Tab 2) ====================
+		ConfigCategory biomeCategory = builder.getOrCreateCategory(
+			Text.translatable("simplefps.config.category.biome"));
+
+		biomeCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Note: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Displays the current biome name on screen.").formatted(Formatting.WHITE)))
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Colors: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Use the 'Text Color' and 'BG Color' buttons at the bottom-left to pick colors.").formatted(Formatting.WHITE)))
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.biomeEnabled"),
+			config.biomeEnabled)
+			.setDefaultValue(false)
+			.setTooltip(Text.translatable("simplefps.config.biomeEnabled.tooltip"))
+			.setSaveConsumer(newValue -> config.biomeEnabled = newValue)
+			.build());
+
+		int biomeTextSizePercent = (int) (config.biomeTextSize * 100);
+		biomeCategory.addEntry(entryBuilder.startIntSlider(
+			Text.translatable("simplefps.config.biomeTextSize"),
+			biomeTextSizePercent,
+			50, 200)
+			.setDefaultValue(100)
+			.setTooltip(Text.translatable("simplefps.config.biomeTextSize.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
+			.setSaveConsumer(newValue -> config.biomeTextSize = newValue / 100.0f)
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startIntSlider(
+			Text.translatable("simplefps.config.biomeTextOpacity"),
+			config.biomeTextOpacity,
+			0, 100)
+			.setDefaultValue(100)
+			.setTooltip(Text.translatable("simplefps.config.biomeTextOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
+			.setSaveConsumer(newValue -> config.biomeTextOpacity = newValue)
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.biomeShowBackground"),
+			config.biomeShowBackground)
+			.setDefaultValue(true)
+			.setTooltip(Text.translatable("simplefps.config.biomeShowBackground.tooltip"))
+			.setSaveConsumer(newValue -> config.biomeShowBackground = newValue)
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startIntSlider(
+			Text.translatable("simplefps.config.biomeBackgroundOpacity"),
+			config.biomeBackgroundOpacity,
+			0, 100)
+			.setDefaultValue(50)
+			.setTooltip(Text.translatable("simplefps.config.biomeBackgroundOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
+			.setSaveConsumer(newValue -> config.biomeBackgroundOpacity = newValue)
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Position: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Use 'Drag HUD Elements' keybind to visually reposition.").formatted(Formatting.WHITE)))
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.biomeX"),
+			config.biomeX)
+			.setDefaultValue(5)
+			.setMin(0)
+			.setMax(3840)
+			.setTooltip(Text.translatable("simplefps.config.biomeX.tooltip"))
+			.setSaveConsumer(newValue -> config.biomeX = newValue)
+			.build());
+
+		biomeCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.biomeY"),
+			config.biomeY)
+			.setDefaultValue(70)
+			.setMin(0)
+			.setMax(2160)
+			.setTooltip(Text.translatable("simplefps.config.biomeY.tooltip"))
+			.setSaveConsumer(newValue -> config.biomeY = newValue)
+			.build());
+
+		// ==================== FPS Graph Category (Tab 3) ====================
 		ConfigCategory graphCategory = builder.getOrCreateCategory(
 			Text.translatable("simplefps.config.category.graph"));
 
@@ -353,7 +531,50 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.graphHighFpsThreshold = newValue)
 			.build());
 
-		// Keybindings Category
+		// ==================== Adaptive Color Category (Tab 4) ====================
+		ConfigCategory adaptiveCategory = builder.getOrCreateCategory(
+			Text.translatable("simplefps.config.category.adaptive"));
+
+		adaptiveCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Note: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Enabling adaptive colors will override the custom text color. Colors change based on FPS:").formatted(Formatting.WHITE))
+				.append(Text.literal("\n  Red").formatted(Formatting.RED))
+				.append(Text.literal(" = Low FPS (at or below threshold)").formatted(Formatting.WHITE))
+				.append(Text.literal("\n  Yellow").formatted(Formatting.YELLOW))
+				.append(Text.literal(" = Medium FPS (between thresholds)").formatted(Formatting.WHITE))
+				.append(Text.literal("\n  Green").formatted(Formatting.GREEN))
+				.append(Text.literal(" = High FPS (at or above threshold)").formatted(Formatting.WHITE)))
+			.build());
+
+		adaptiveCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.adaptiveColor"),
+			config.adaptiveColorEnabled)
+			.setDefaultValue(false)
+			.setTooltip(Text.translatable("simplefps.config.adaptiveColor.tooltip"))
+			.setSaveConsumer(newValue -> config.adaptiveColorEnabled = newValue)
+			.build());
+
+		adaptiveCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.lowFpsThreshold"),
+			config.lowFpsThreshold)
+			.setDefaultValue(25)
+			.setMin(1)
+			.setMax(999)
+			.setTooltip(Text.translatable("simplefps.config.lowFpsThreshold.tooltip"))
+			.setSaveConsumer(newValue -> config.lowFpsThreshold = newValue)
+			.build());
+
+		adaptiveCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.highFpsThreshold"),
+			config.highFpsThreshold)
+			.setDefaultValue(60)
+			.setMin(1)
+			.setMax(999)
+			.setTooltip(Text.translatable("simplefps.config.highFpsThreshold.tooltip"))
+			.setSaveConsumer(newValue -> config.highFpsThreshold = newValue)
+			.build());
+
+		// ==================== Keybindings Category (Tab 5) ====================
 		ConfigCategory keybindsCategory = builder.getOrCreateCategory(
 			Text.translatable("simplefps.config.category.keybinds"));
 
@@ -379,15 +600,46 @@ public class ModConfigScreen {
 			.build());
 
 		keybindsCategory.addEntry(entryBuilder.fillKeybindingField(
-			Text.translatable("simplefps.key.dragGraph"),
-			SimpleFPSClient.dragGraphKeyBinding)
-			.build());
-
-		keybindsCategory.addEntry(entryBuilder.fillKeybindingField(
 			Text.translatable("simplefps.key.reload"),
 			SimpleFPSClient.reloadKeyBinding)
 			.build());
 
 		return builder.build();
+	}
+	
+	// Get the text color for the specified category
+	private static String getTextColorForCategory(SimpleFPSConfig config, String category) {
+		return switch (category) {
+			case "Coordinates" -> config.coordinatesTextColor;
+			case "Biome" -> config.biomeTextColor;
+			default -> config.textColor; // FPS Counter and others
+		};
+	}
+	
+	// Set the text color for the specified category
+	private static void setTextColorForCategory(SimpleFPSConfig config, String category, String color) {
+		switch (category) {
+			case "Coordinates" -> config.coordinatesTextColor = color;
+			case "Biome" -> config.biomeTextColor = color;
+			default -> config.textColor = color; // FPS Counter
+		}
+	}
+	
+	// Get the background color for the specified category
+	private static String getBgColorForCategory(SimpleFPSConfig config, String category) {
+		return switch (category) {
+			case "Coordinates" -> config.coordinatesBackgroundColor;
+			case "Biome" -> config.biomeBackgroundColor;
+			default -> config.backgroundColor; // FPS Counter
+		};
+	}
+	
+	// Set the background color for the specified category
+	private static void setBgColorForCategory(SimpleFPSConfig config, String category, String color) {
+		switch (category) {
+			case "Coordinates" -> config.coordinatesBackgroundColor = color;
+			case "Biome" -> config.biomeBackgroundColor = color;
+			default -> config.backgroundColor = color; // FPS Counter
+		}
 	}
 }

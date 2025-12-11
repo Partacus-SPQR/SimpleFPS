@@ -117,6 +117,26 @@ public class SimpleFPSConfigScreen extends Screen {
 		configRows.add(new ConfigRow(showLabelBtn, showLabelReset,
 			"Show 'FPS: ' label before the number. (Default: ON)", rowIndex++));
 		
+		// Show Direction toggle
+		ButtonWidget showDirectionBtn = ButtonWidget.builder(
+			Text.literal("Show Direction: " + (config.showDirection ? "ON" : "OFF")),
+			button -> {
+				config.showDirection = !config.showDirection;
+				button.setMessage(Text.literal("Show Direction: " + (config.showDirection ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget showDirectionReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.showDirection = false;
+				showDirectionBtn.setMessage(Text.literal("Show Direction: OFF"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(showDirectionBtn, showDirectionReset,
+			"Show facing direction (N/E/S/W) after FPS. (Default: OFF)", rowIndex++));
+		
 		// === APPEARANCE SECTION ===
 		configRows.add(new ConfigRow("§e§l[ Appearance ]", rowIndex++, true));
 		
@@ -225,21 +245,27 @@ public class SimpleFPSConfigScreen extends Screen {
 		// === POSITION SECTION ===
 		configRows.add(new ConfigRow("§e§l[ Position ]", rowIndex++, true));
 		
+		// Get screen dimensions for slider max values
+		int screenWidth = this.width;
+		int screenHeight = this.height;
+		
 		// Position X slider
-		IntSlider posXSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Position X", 0, 500, config.positionX, " px");
+		IntSlider posXSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Position X", 0, screenWidth, config.positionX, " px");
+		final int posXMax = screenWidth;
 		ButtonWidget posXReset = ButtonWidget.builder(
 			Text.literal("Reset"),
-			button -> posXSlider.setValue(5, 0, 500)
+			button -> posXSlider.setValue(5, 0, posXMax)
 		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(posXSlider, posXReset,
 			"Horizontal position in pixels. (Default: 5)", rowIndex++));
 		
 		// Position Y slider
-		IntSlider posYSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Position Y", 0, 500, config.positionY, " px");
+		IntSlider posYSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Position Y", 0, screenHeight, config.positionY, " px");
+		final int posYMax = screenHeight;
 		ButtonWidget posYReset = ButtonWidget.builder(
 			Text.literal("Reset"),
-			button -> posYSlider.setValue(5, 0, 500)
+			button -> posYSlider.setValue(5, 0, posYMax)
 		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(posYSlider, posYReset,
@@ -332,20 +358,22 @@ public class SimpleFPSConfigScreen extends Screen {
 			"Show a background behind the FPS graph. (Default: ON)", rowIndex++));
 		
 		// Graph X slider
-		IntSlider graphXSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph X", 0, 500, config.graphX, " px");
+		IntSlider graphXSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph X", 0, screenWidth, config.graphX, " px");
+		final int graphXMax = screenWidth;
 		ButtonWidget graphXReset = ButtonWidget.builder(
 			Text.literal("Reset"),
-			button -> graphXSlider.setValue(5, 0, 500)
+			button -> graphXSlider.setValue(5, 0, graphXMax)
 		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphXSlider, graphXReset,
 			"Graph horizontal position in pixels. (Default: 5)", rowIndex++));
 		
 		// Graph Y slider
-		IntSlider graphYSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph Y", 0, 500, config.graphY, " px");
+		IntSlider graphYSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph Y", 0, screenHeight, config.graphY, " px");
+		final int graphYMax = screenHeight;
 		ButtonWidget graphYReset = ButtonWidget.builder(
 			Text.literal("Reset"),
-			button -> graphYSlider.setValue(100, 0, 500)
+			button -> graphYSlider.setValue(100, 0, graphYMax)
 		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphYSlider, graphYReset,
@@ -380,6 +408,256 @@ public class SimpleFPSConfigScreen extends Screen {
 		
 		configRows.add(new ConfigRow(graphHighFpsSlider, graphHighFpsReset,
 			"High FPS threshold for graph coloring. (Default: 60)", rowIndex++));
+		
+		// === COORDINATES SECTION ===
+		configRows.add(new ConfigRow("§e§l[ Coordinates ]", rowIndex++, true));
+		
+		// Coordinates Enabled toggle
+		ButtonWidget coordEnabledBtn = ButtonWidget.builder(
+			Text.literal("Coordinates: " + (config.coordinatesEnabled ? "ON" : "OFF")),
+			button -> {
+				config.coordinatesEnabled = !config.coordinatesEnabled;
+				button.setMessage(Text.literal("Coordinates: " + (config.coordinatesEnabled ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget coordEnabledReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.coordinatesEnabled = false;
+				coordEnabledBtn.setMessage(Text.literal("Coordinates: OFF"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(coordEnabledBtn, coordEnabledReset,
+			"Show X/Y/Z coordinates on screen. (Default: OFF)", rowIndex++));
+		
+		// Coordinates Text Color
+		TextFieldWidget coordColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
+		coordColorField.setText(config.coordinatesTextColor);
+		coordColorField.setMaxLength(7);
+		
+		ButtonWidget coordColorPick = ButtonWidget.builder(
+			Text.literal("Pick"),
+			button -> {
+				client.setScreen(new ColorPickerScreen(this, config.coordinatesTextColor, color -> {
+					config.coordinatesTextColor = color;
+					coordColorField.setText(color);
+				}));
+			}
+		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		
+		ButtonWidget coordColorReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.coordinatesTextColor = "#FFFFFF";
+				coordColorField.setText("#FFFFFF");
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(coordColorField, coordColorPick, coordColorReset,
+			"Coordinates text color. (Default: #FFFFFF)", rowIndex++));
+		
+		// Coordinates Background toggle
+		ButtonWidget coordBgBtn = ButtonWidget.builder(
+			Text.literal("Coord BG: " + (config.coordinatesShowBackground ? "ON" : "OFF")),
+			button -> {
+				config.coordinatesShowBackground = !config.coordinatesShowBackground;
+				button.setMessage(Text.literal("Coord BG: " + (config.coordinatesShowBackground ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget coordBgReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.coordinatesShowBackground = true;
+				coordBgBtn.setMessage(Text.literal("Coord BG: ON"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(coordBgBtn, coordBgReset,
+			"Show background behind coordinates. (Default: ON)", rowIndex++));
+		
+		// Coordinates Background Color
+		TextFieldWidget coordBgColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
+		coordBgColorField.setText(config.coordinatesBackgroundColor);
+		coordBgColorField.setMaxLength(7);
+		
+		ButtonWidget coordBgColorPick = ButtonWidget.builder(
+			Text.literal("Pick"),
+			button -> {
+				client.setScreen(new ColorPickerScreen(this, config.coordinatesBackgroundColor, color -> {
+					config.coordinatesBackgroundColor = color;
+					coordBgColorField.setText(color);
+				}));
+			}
+		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		
+		ButtonWidget coordBgColorReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.coordinatesBackgroundColor = "#000000";
+				coordBgColorField.setText("#000000");
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(coordBgColorField, coordBgColorPick, coordBgColorReset,
+			"Coordinates background color. (Default: #000000)", rowIndex++));
+		
+		// Coordinates Text Size slider
+		FloatSlider coordSizeSlider = new FloatSlider(widgetX, 0, WIDGET_WIDTH, 20, "Coord Size", 0.5f, 2.0f, config.coordinatesTextSize, "x");
+		ButtonWidget coordSizeReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> coordSizeSlider.setValue(1.0f)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(coordSizeSlider, coordSizeReset,
+			"Coordinates text size. (Default: 1.0x)", rowIndex++));
+		
+		// Coordinates Text Opacity slider
+		IntSlider coordOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Coord Opacity", 0, 100, config.coordinatesTextOpacity, "%");
+		ButtonWidget coordOpacityReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> coordOpacitySlider.setValue(100, 0, 100)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(coordOpacitySlider, coordOpacityReset,
+			"Coordinates text opacity. (Default: 100%)", rowIndex++));
+		
+		// Coordinates Background Opacity slider
+		IntSlider coordBgOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Coord BG Op", 0, 100, config.coordinatesBackgroundOpacity, "%");
+		ButtonWidget coordBgOpacityReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> coordBgOpacitySlider.setValue(50, 0, 100)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(coordBgOpacitySlider, coordBgOpacityReset,
+			"Coordinates background opacity. (Default: 50%)", rowIndex++));
+		
+		// === BIOME SECTION ===
+		configRows.add(new ConfigRow("§e§l[ Biome ]", rowIndex++, true));
+		
+		// Biome Enabled toggle
+		ButtonWidget biomeEnabledBtn = ButtonWidget.builder(
+			Text.literal("Biome: " + (config.biomeEnabled ? "ON" : "OFF")),
+			button -> {
+				config.biomeEnabled = !config.biomeEnabled;
+				button.setMessage(Text.literal("Biome: " + (config.biomeEnabled ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget biomeEnabledReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.biomeEnabled = false;
+				biomeEnabledBtn.setMessage(Text.literal("Biome: OFF"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(biomeEnabledBtn, biomeEnabledReset,
+			"Show current biome name on screen. (Default: OFF)", rowIndex++));
+		
+		// Biome Text Color
+		TextFieldWidget biomeColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
+		biomeColorField.setText(config.biomeTextColor);
+		biomeColorField.setMaxLength(7);
+		
+		ButtonWidget biomeColorPick = ButtonWidget.builder(
+			Text.literal("Pick"),
+			button -> {
+				client.setScreen(new ColorPickerScreen(this, config.biomeTextColor, color -> {
+					config.biomeTextColor = color;
+					biomeColorField.setText(color);
+				}));
+			}
+		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		
+		ButtonWidget biomeColorReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.biomeTextColor = "#FFFFFF";
+				biomeColorField.setText("#FFFFFF");
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(biomeColorField, biomeColorPick, biomeColorReset,
+			"Biome text color. (Default: #FFFFFF)", rowIndex++));
+		
+		// Biome Background toggle
+		ButtonWidget biomeBgBtn = ButtonWidget.builder(
+			Text.literal("Biome BG: " + (config.biomeShowBackground ? "ON" : "OFF")),
+			button -> {
+				config.biomeShowBackground = !config.biomeShowBackground;
+				button.setMessage(Text.literal("Biome BG: " + (config.biomeShowBackground ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget biomeBgReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.biomeShowBackground = true;
+				biomeBgBtn.setMessage(Text.literal("Biome BG: ON"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(biomeBgBtn, biomeBgReset,
+			"Show background behind biome. (Default: ON)", rowIndex++));
+		
+		// Biome Background Color
+		TextFieldWidget biomeBgColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
+		biomeBgColorField.setText(config.biomeBackgroundColor);
+		biomeBgColorField.setMaxLength(7);
+		
+		ButtonWidget biomeBgColorPick = ButtonWidget.builder(
+			Text.literal("Pick"),
+			button -> {
+				client.setScreen(new ColorPickerScreen(this, config.biomeBackgroundColor, color -> {
+					config.biomeBackgroundColor = color;
+					biomeBgColorField.setText(color);
+				}));
+			}
+		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		
+		ButtonWidget biomeBgColorReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.biomeBackgroundColor = "#000000";
+				biomeBgColorField.setText("#000000");
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(biomeBgColorField, biomeBgColorPick, biomeBgColorReset,
+			"Biome background color. (Default: #000000)", rowIndex++));
+		
+		// Biome Text Size slider
+		FloatSlider biomeSizeSlider = new FloatSlider(widgetX, 0, WIDGET_WIDTH, 20, "Biome Size", 0.5f, 2.0f, config.biomeTextSize, "x");
+		ButtonWidget biomeSizeReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> biomeSizeSlider.setValue(1.0f)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(biomeSizeSlider, biomeSizeReset,
+			"Biome text size. (Default: 1.0x)", rowIndex++));
+		
+		// Biome Text Opacity slider
+		IntSlider biomeOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Biome Opacity", 0, 100, config.biomeTextOpacity, "%");
+		ButtonWidget biomeOpacityReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> biomeOpacitySlider.setValue(100, 0, 100)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(biomeOpacitySlider, biomeOpacityReset,
+			"Biome text opacity. (Default: 100%)", rowIndex++));
+		
+		// Biome Background Opacity slider
+		IntSlider biomeBgOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Biome BG Op", 0, 100, config.biomeBackgroundOpacity, "%");
+		ButtonWidget biomeBgOpacityReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> biomeBgOpacitySlider.setValue(50, 0, 100)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(biomeBgOpacitySlider, biomeBgOpacityReset,
+			"Biome background opacity. (Default: 50%)", rowIndex++));
 		
 		// Calculate max scroll offset
 		int totalContentHeight = rowIndex * ROW_HEIGHT;
@@ -426,6 +704,8 @@ public class SimpleFPSConfigScreen extends Screen {
 		for (ConfigRow row : configRows) {
 			row.saveToConfig(config);
 		}
+		// Update reference resolution so positions scale correctly when window is resized
+		config.updateReferenceResolution(this.width, this.height);
 		config.save();
 	}
 	

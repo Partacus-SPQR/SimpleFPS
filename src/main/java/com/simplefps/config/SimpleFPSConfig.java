@@ -17,39 +17,68 @@ public class SimpleFPSConfig {
 	private static final File CONFIG_FILE = new File(FabricLoader.getInstance().getConfigDir().toFile(), "simplefps.json");
 	private static SimpleFPSConfig INSTANCE;
 
-	// General options
+	// ==================== FPS Counter Options ====================
 	public boolean enabled = true;
 	public boolean showLabel = true;
+	public boolean showDirection = false; // Shows N/E/S/W after FPS
 	
-	// Position options (can be dragged by user)
+	// FPS Counter Position
 	public int positionX = 5;
 	public int positionY = 5;
 	
-	// Appearance options
+	// FPS Counter Appearance
 	public String textColor = "#FFFFFF";
 	public float textSize = 1.0f;
 	public int textOpacity = 100; // 0-100 percentage
 	
-	// Background options
+	// FPS Counter Background
 	public boolean showBackground = true;
 	public String backgroundColor = "#000000";
 	public int backgroundOpacity = 50; // 0-100 percentage
 	
-	// Adaptive color options
+	// FPS Adaptive color options
 	public boolean adaptiveColorEnabled = false;
 	public int lowFpsThreshold = 25;  // Red at or below this
 	public int highFpsThreshold = 60; // Green at or above this
 	
-	// FPS Graph options
+	// ==================== FPS Graph Options ====================
 	public boolean graphEnabled = false;
 	public int graphX = 5;
 	public int graphY = 100;
 	public int graphScale = 100; // 50-200%
 	public boolean graphShowBackground = true;
 	
-	// Graph-specific thresholds (separate from FPS counter adaptive colors)
+	// Graph-specific thresholds
 	public int graphLowFpsThreshold = 30;
 	public int graphHighFpsThreshold = 60;
+	
+	// ==================== Coordinates Options ====================
+	public boolean coordinatesEnabled = false;
+	public int coordinatesX = 5;
+	public int coordinatesY = 50;
+	public String coordinatesTextColor = "#FFFFFF";
+	public float coordinatesTextSize = 1.0f;
+	public int coordinatesTextOpacity = 100;
+	public boolean coordinatesShowBackground = true;
+	public String coordinatesBackgroundColor = "#000000";
+	public int coordinatesBackgroundOpacity = 50;
+	
+	// ==================== Biome Options ====================
+	public boolean biomeEnabled = false;
+	public int biomeX = 5;
+	public int biomeY = 70;
+	public String biomeTextColor = "#FFFFFF";
+	public float biomeTextSize = 1.0f;
+	public int biomeTextOpacity = 100;
+	public boolean biomeShowBackground = true;
+	public String biomeBackgroundColor = "#000000";
+	public int biomeBackgroundOpacity = 50;
+
+	// ==================== Reference Resolution (for scaling) ====================
+	// These store the screen size when positions were last set
+	// Positions will scale proportionally when window is resized
+	public int referenceWidth = 0;  // 0 means not set yet
+	public int referenceHeight = 0;
 
 	public static SimpleFPSConfig load() {
 		if (INSTANCE == null) {
@@ -141,13 +170,123 @@ public class SimpleFPSConfig {
 		return (alpha << 24) | rgb;
 	}
 	
+	// ==================== Position Scaling Methods ====================
+	
+	/**
+	 * Get scaled X position using anchor-based scaling.
+	 * Elements positioned in the left third scale from left, center third stays centered,
+	 * right third scales from right edge.
+	 */
+	private int getScaledX(int originalX, int currentWidth) {
+		if (referenceWidth <= 0 || referenceWidth == currentWidth) {
+			return originalX;
+		}
+		
+		// Determine which third of the screen the element was in
+		int leftThird = referenceWidth / 3;
+		int rightThird = referenceWidth * 2 / 3;
+		
+		if (originalX < leftThird) {
+			// Left third: scale from left edge (keep distance from left)
+			return (int) ((float) originalX / referenceWidth * currentWidth);
+		} else if (originalX > rightThird) {
+			// Right third: scale from right edge (keep distance from right)
+			int distFromRight = referenceWidth - originalX;
+			int scaledDistFromRight = (int) ((float) distFromRight / referenceWidth * currentWidth);
+			return currentWidth - scaledDistFromRight;
+		} else {
+			// Center third: keep centered (maintain relative center position)
+			float relativeCenter = (float) originalX / referenceWidth;
+			return (int) (relativeCenter * currentWidth);
+		}
+	}
+	
+	/**
+	 * Get scaled X position for FPS counter based on current screen size.
+	 */
+	public int getScaledPositionX(int currentWidth) {
+		return getScaledX(positionX, currentWidth);
+	}
+	
+	/**
+	 * Get scaled Y position for FPS counter based on current screen size.
+	 */
+	public int getScaledPositionY(int currentHeight) {
+		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
+			return positionY;
+		}
+		return (int) ((float) positionY / referenceHeight * currentHeight);
+	}
+	
+	/**
+	 * Get scaled X position for Graph based on current screen size.
+	 */
+	public int getScaledGraphX(int currentWidth) {
+		return getScaledX(graphX, currentWidth);
+	}
+	
+	/**
+	 * Get scaled Y position for Graph based on current screen size.
+	 */
+	public int getScaledGraphY(int currentHeight) {
+		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
+			return graphY;
+		}
+		return (int) ((float) graphY / referenceHeight * currentHeight);
+	}
+	
+	/**
+	 * Get scaled X position for Coordinates based on current screen size.
+	 */
+	public int getScaledCoordinatesX(int currentWidth) {
+		return getScaledX(coordinatesX, currentWidth);
+	}
+	
+	/**
+	 * Get scaled Y position for Coordinates based on current screen size.
+	 */
+	public int getScaledCoordinatesY(int currentHeight) {
+		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
+			return coordinatesY;
+		}
+		return (int) ((float) coordinatesY / referenceHeight * currentHeight);
+	}
+	
+	/**
+	 * Get scaled X position for Biome based on current screen size.
+	 */
+	public int getScaledBiomeX(int currentWidth) {
+		return getScaledX(biomeX, currentWidth);
+	}
+	
+	/**
+	 * Get scaled Y position for Biome based on current screen size.
+	 */
+	public int getScaledBiomeY(int currentHeight) {
+		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
+			return biomeY;
+		}
+		return (int) ((float) biomeY / referenceHeight * currentHeight);
+	}
+	
+	/**
+	 * Update reference resolution to current screen size.
+	 * Call this when user drags an element to a new position.
+	 */
+	public void updateReferenceResolution(int width, int height) {
+		this.referenceWidth = width;
+		this.referenceHeight = height;
+	}
+
 	/**
 	 * Creates a copy of this config for live preview purposes.
 	 */
 	public SimpleFPSConfig copy() {
 		SimpleFPSConfig copy = new SimpleFPSConfig();
+		// FPS Counter
 		copy.enabled = this.enabled;
 		copy.showLabel = this.showLabel;
+		copy.showDirection = this.showDirection;
 		copy.positionX = this.positionX;
 		copy.positionY = this.positionY;
 		copy.textColor = this.textColor;
@@ -159,10 +298,37 @@ public class SimpleFPSConfig {
 		copy.adaptiveColorEnabled = this.adaptiveColorEnabled;
 		copy.lowFpsThreshold = this.lowFpsThreshold;
 		copy.highFpsThreshold = this.highFpsThreshold;
+		// Graph
 		copy.graphEnabled = this.graphEnabled;
 		copy.graphX = this.graphX;
 		copy.graphY = this.graphY;
 		copy.graphScale = this.graphScale;
+		copy.graphShowBackground = this.graphShowBackground;
+		copy.graphLowFpsThreshold = this.graphLowFpsThreshold;
+		copy.graphHighFpsThreshold = this.graphHighFpsThreshold;
+		// Coordinates
+		copy.coordinatesEnabled = this.coordinatesEnabled;
+		copy.coordinatesX = this.coordinatesX;
+		copy.coordinatesY = this.coordinatesY;
+		copy.coordinatesTextColor = this.coordinatesTextColor;
+		copy.coordinatesTextSize = this.coordinatesTextSize;
+		copy.coordinatesTextOpacity = this.coordinatesTextOpacity;
+		copy.coordinatesShowBackground = this.coordinatesShowBackground;
+		copy.coordinatesBackgroundColor = this.coordinatesBackgroundColor;
+		copy.coordinatesBackgroundOpacity = this.coordinatesBackgroundOpacity;
+		// Biome
+		copy.biomeEnabled = this.biomeEnabled;
+		copy.biomeX = this.biomeX;
+		copy.biomeY = this.biomeY;
+		copy.biomeTextColor = this.biomeTextColor;
+		copy.biomeTextSize = this.biomeTextSize;
+		copy.biomeTextOpacity = this.biomeTextOpacity;
+		copy.biomeShowBackground = this.biomeShowBackground;
+		copy.biomeBackgroundColor = this.biomeBackgroundColor;
+		copy.biomeBackgroundOpacity = this.biomeBackgroundOpacity;
+		// Reference resolution
+		copy.referenceWidth = this.referenceWidth;
+		copy.referenceHeight = this.referenceHeight;
 		return copy;
 	}
 	
@@ -170,8 +336,10 @@ public class SimpleFPSConfig {
 	 * Copies values from another config into this one.
 	 */
 	public void copyFrom(SimpleFPSConfig other) {
+		// FPS Counter
 		this.enabled = other.enabled;
 		this.showLabel = other.showLabel;
+		this.showDirection = other.showDirection;
 		this.positionX = other.positionX;
 		this.positionY = other.positionY;
 		this.textColor = other.textColor;
@@ -183,10 +351,75 @@ public class SimpleFPSConfig {
 		this.adaptiveColorEnabled = other.adaptiveColorEnabled;
 		this.lowFpsThreshold = other.lowFpsThreshold;
 		this.highFpsThreshold = other.highFpsThreshold;
+		// Graph
 		this.graphEnabled = other.graphEnabled;
 		this.graphX = other.graphX;
 		this.graphY = other.graphY;
 		this.graphScale = other.graphScale;
+		this.graphShowBackground = other.graphShowBackground;
+		this.graphLowFpsThreshold = other.graphLowFpsThreshold;
+		this.graphHighFpsThreshold = other.graphHighFpsThreshold;
+		// Coordinates
+		this.coordinatesEnabled = other.coordinatesEnabled;
+		this.coordinatesX = other.coordinatesX;
+		this.coordinatesY = other.coordinatesY;
+		this.coordinatesTextColor = other.coordinatesTextColor;
+		this.coordinatesTextSize = other.coordinatesTextSize;
+		this.coordinatesTextOpacity = other.coordinatesTextOpacity;
+		this.coordinatesShowBackground = other.coordinatesShowBackground;
+		this.coordinatesBackgroundColor = other.coordinatesBackgroundColor;
+		this.coordinatesBackgroundOpacity = other.coordinatesBackgroundOpacity;
+		// Biome
+		this.biomeEnabled = other.biomeEnabled;
+		this.biomeX = other.biomeX;
+		this.biomeY = other.biomeY;
+		this.biomeTextColor = other.biomeTextColor;
+		this.biomeTextSize = other.biomeTextSize;
+		this.biomeTextOpacity = other.biomeTextOpacity;
+		this.biomeShowBackground = other.biomeShowBackground;
+		this.biomeBackgroundColor = other.biomeBackgroundColor;
+		this.biomeBackgroundOpacity = other.biomeBackgroundOpacity;
+		// Reference resolution
+		this.referenceWidth = other.referenceWidth;
+		this.referenceHeight = other.referenceHeight;
+	}
+	
+	// ==================== Color Helper Methods ====================
+	
+	/**
+	 * Get coordinates text color with alpha applied.
+	 */
+	public int getCoordinatesTextColorWithAlpha() {
+		int rgb = parseHexColor(coordinatesTextColor);
+		int alpha = (int) (255 * (coordinatesTextOpacity / 100.0f));
+		return (alpha << 24) | rgb;
+	}
+	
+	/**
+	 * Get coordinates background color with alpha applied.
+	 */
+	public int getCoordinatesBackgroundColorWithAlpha() {
+		int rgb = parseHexColor(coordinatesBackgroundColor);
+		int alpha = (int) (255 * (coordinatesBackgroundOpacity / 100.0f));
+		return (alpha << 24) | rgb;
+	}
+	
+	/**
+	 * Get biome text color with alpha applied.
+	 */
+	public int getBiomeTextColorWithAlpha() {
+		int rgb = parseHexColor(biomeTextColor);
+		int alpha = (int) (255 * (biomeTextOpacity / 100.0f));
+		return (alpha << 24) | rgb;
+	}
+	
+	/**
+	 * Get biome background color with alpha applied.
+	 */
+	public int getBiomeBackgroundColorWithAlpha() {
+		int rgb = parseHexColor(biomeBackgroundColor);
+		int alpha = (int) (255 * (biomeBackgroundOpacity / 100.0f));
+		return (alpha << 24) | rgb;
 	}
 	
 	/**

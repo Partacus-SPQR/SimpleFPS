@@ -1,10 +1,11 @@
 package com.simplefps;
 
 import com.simplefps.config.SimpleFPSConfig;
-import com.simplefps.gui.GraphDragScreen;
+import com.simplefps.gui.HudDragScreen;
 import com.simplefps.hud.FPSGraphRenderer;
 import com.simplefps.hud.FPSHudRenderer;
-import com.simplefps.screen.FPSDragScreen;
+import com.simplefps.hud.CoordinatesRenderer;
+import com.simplefps.hud.BiomeRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -20,13 +21,11 @@ public class SimpleFPSClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("SimpleFPS");
 	
 	// Define a custom category for our keybindings
-	// The translation key will be "key.category.simplefps.category"
 	private static final KeyBinding.Category SIMPLEFPS_CATEGORY = new KeyBinding.Category(Identifier.of(MOD_ID, "category"));
 	
 	public static KeyBinding toggleKeyBinding;
 	public static KeyBinding configKeyBinding;
 	public static KeyBinding dragKeyBinding;
-	public static KeyBinding dragGraphKeyBinding;
 	public static KeyBinding reloadKeyBinding;
 	
 	@Override
@@ -36,42 +35,36 @@ public class SimpleFPSClient implements ClientModInitializer {
 		// Load config
 		SimpleFPSConfig.load();
 		
-		// Register the FPS HUD renderer using HudRenderCallback
+		// Register HUD renderers
 		HudRenderCallback.EVENT.register((context, tickCounter) -> {
 			FPSHudRenderer.render(context, tickCounter);
-			// Also render the graph if enabled
 			FPSGraphRenderer.renderGraph(context, false);
+			CoordinatesRenderer.render(context, false);
+			BiomeRenderer.render(context, false);
 		});
 		
-		// Register keybindings with the new Category-based constructor
-		// All keybindings are unbound by default - users can set their own in Controls
+		// Register keybindings (all unbound by default)
 		toggleKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 			"key.simplefps.toggle",
-			GLFW.GLFW_KEY_UNKNOWN, // Unbound by default
+			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
 		
 		configKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 			"key.simplefps.config",
-			GLFW.GLFW_KEY_UNKNOWN, // Unbound by default
+			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
 		
 		dragKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 			"key.simplefps.drag",
-			GLFW.GLFW_KEY_UNKNOWN, // Unbound by default
-			SIMPLEFPS_CATEGORY
-		));
-		
-		dragGraphKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-			"key.simplefps.dragGraph",
-			GLFW.GLFW_KEY_UNKNOWN, // Unbound by default
+			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
 		
 		reloadKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
 			"key.simplefps.reload",
-			GLFW.GLFW_KEY_UNKNOWN, // Unbound by default
+			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
 		
@@ -86,7 +79,6 @@ public class SimpleFPSClient implements ClientModInitializer {
 			
 			while (configKeyBinding.wasPressed()) {
 				if (client.currentScreen == null) {
-					// Try to use Cloth Config screen if available, otherwise fallback
 					try {
 						Class.forName("me.shedaniel.clothconfig2.api.ConfigBuilder");
 						client.setScreen(com.simplefps.config.ModConfigScreen.createConfigScreen(null));
@@ -98,16 +90,7 @@ public class SimpleFPSClient implements ClientModInitializer {
 			
 			while (dragKeyBinding.wasPressed()) {
 				if (client.currentScreen == null) {
-					client.setScreen(new FPSDragScreen(null));
-				}
-			}
-			
-			while (dragGraphKeyBinding.wasPressed()) {
-				if (client.currentScreen == null) {
-					SimpleFPSConfig config = SimpleFPSConfig.getInstance();
-					if (config.graphEnabled) {
-						client.setScreen(new GraphDragScreen(null));
-					}
+					client.setScreen(new HudDragScreen(null));
 				}
 			}
 			

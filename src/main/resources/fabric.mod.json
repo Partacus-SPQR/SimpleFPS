@@ -32,6 +32,6 @@
 	},
 	"recommends": {
 		"modmenu": "*",
-		"cloth-config": ">=20.0.0"
+		"cloth-config": ">=21.11.0"
 	}
 }

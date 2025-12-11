@@ -5,8 +5,10 @@ A lightweight, customizable FPS counter mod for Minecraft (Fabric 1.21.11).
 ## Features
 
 - **FPS Counter** - Real-time FPS display with customizable appearance
+- **Coordinates Display** - Show X/Y/Z position on screen
+- **Biome Display** - Show current biome name
 - **FPS Graph** - Visual FPS history with Min/Max/Avg statistics
-- **Draggable UI** - Position both counter and graph anywhere on screen
+- **Draggable UI** - Position all HUD elements anywhere on screen
 - **Color Picker** - Built-in visual color picker for easy customization
 - **Adaptive Colors** - Optional color-coding based on FPS thresholds
 - **Live Preview** - See changes in real-time while configuring
@@ -48,11 +50,11 @@ All keybinds are unbound by default. Set them in **Options > Controls > SimpleFP
 
 | Dependency | Version | Required |
 |------------|---------|----------|
-| Minecraft | 1.21.11 | ✅ |
-| Fabric Loader | ≥0.18.0 | ✅ |
-| Fabric API | Any | ✅ |
-| Cloth Config | ≥20.0.0 | ❌ Optional |
-| Mod Menu | ≥17.0.0 | ❌ Optional |
+| Minecraft | 1.21.11 | Yes |
+| Fabric Loader | ≥0.18.0 | Yes |
+| Fabric API | Any | Yes |
+| Cloth Config | ≥21.11.0 | Optional |
+| Mod Menu | ≥17.0.0 | Optional |
 
 ## License
 
