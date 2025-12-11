@@ -2,6 +2,17 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
+## [1.1.1] - 2024-12-11
+
+### Fixed
+- **Scrollable Fallback Config** - Config screen now scrolls and adapts to any window size
+- Fixed config widgets overlapping bottom buttons on small Minecraft windows
+- Config screen now has a visible scrollbar when content exceeds visible area
+
+### Changed
+- Improved widget positioning in fallback config (uses manual scroll offset)
+- Bottom buttons (Save & Close, Key Binds, Cancel) are now fixed at the bottom
+
 ## [1.1.0] - 2024-12-10
 
 ### Changed
