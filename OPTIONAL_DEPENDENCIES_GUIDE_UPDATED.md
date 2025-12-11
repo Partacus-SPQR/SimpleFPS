@@ -206,12 +206,14 @@ When creating a fallback config screen for ANY mod, you **MUST** include:
 2. ✅ **TOOLTIPS** - Every config option MUST have a tooltip explaining what it does
 3. ✅ **RESET BUTTONS (↺)** - Every config option MUST have a reset button to restore default value
 4. ✅ **SCROLLABLE CONTENT** - Config screen MUST scroll when content doesn't fit window (see below)
+5. ✅ **INTERACTIVE SCROLLBAR** - Scrollbar MUST be clickable and draggable (not just mouse wheel)
 
 **Why these are required:**
 - **Sliders:** Provide better UX than text fields, prevent invalid input, match Cloth Config behavior
 - **Tooltips:** Users need to understand what each option does without external documentation
 - **Reset Buttons:** Allow users to quickly restore defaults without remembering original values
 - **Scrollable:** Screen must remain usable at any window size, preventing buttons from overlapping
+- **Interactive Scrollbar:** Users expect to click/drag scrollbars; mouse wheel alone is insufficient
 
 ### Layout Standards:
 
@@ -780,7 +782,7 @@ if (tooltip != null) {
 
 ### Interactive Scrollbar (Click & Drag)
 
-**⚠️ RECOMMENDED: Make your scrollbar interactive!**
+**⚠️ REQUIRED: Your scrollbar MUST be interactive!**
 
 Users expect to click/drag the scrollbar, not just use the mouse wheel. Here's how to implement it:
 
