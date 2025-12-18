@@ -83,16 +83,19 @@ public class TimeClockRenderer {
 	 * Formats the time display based on config settings.
 	 */
 	private static String formatTimeDisplay(MinecraftClient client, SimpleFPSConfig config) {
-		long worldTime = client.world.getTimeOfDay();
+		// getTime() returns total world time since creation
+		// getTimeOfDay() returns time % 24000 (just time of day, not useful for day count)
+		long totalTime = client.world.getTime();
 		
 		// Calculate day number (days start at 1)
-		long dayNumber = (worldTime / 24000L) + 1;
+		long dayNumber = (totalTime / 24000L) + 1;
 		
 		// Get time of day (0-23999)
-		long timeOfDay = worldTime % 24000L;
+		long timeOfDay = totalTime % 24000L;
 		
 		// Convert to hours and minutes
-		// Minecraft time: 0 = 6:00 AM, so we add 6 hours
+		// Minecraft time: 0 ticks = 6:00 AM, so we add 6 hours offset
+		// Reference: 0=6AM, 6000=12PM, 12000=6PM, 18000=12AM, 23000=5AM
 		int totalMinutes = (int) ((timeOfDay * 24 * 60) / 24000);
 		int hours24 = (totalMinutes / 60 + 6) % 24;
 		int minutes = totalMinutes % 60;
