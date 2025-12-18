@@ -2,6 +2,14 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
+## [1.2.1] - 2024-12-17
+
+### Changed
+- **Fabric Loader requirement relaxed** - Now requires >=0.16.0 instead of >=0.18.2 for broader compatibility
+
+### Fixed
+- Build configuration fix for Stonecutter source management (removed duplicate source set declarations)
+
 ## [1.2.0] - 2024-12-17
 
 ### Added

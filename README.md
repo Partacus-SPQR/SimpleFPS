@@ -3,7 +3,7 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.9--1.21.11-green)](https://minecraft.net)
 [![Fabric](https://img.shields.io/badge/Mod%20Loader-Fabric-blue)](https://fabricmc.net)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.2.0-orange)](https://modrinth.com/project/simplefps)
+[![Version](https://img.shields.io/badge/Version-1.2.1-orange)](https://modrinth.com/project/simplefps)
 
 A lightweight, customizable FPS counter mod for Minecraft (Fabric).
 
@@ -60,7 +60,7 @@ All keybinds are unbound by default. Set them in **Options > Controls > SimpleFP
 | Dependency | Version | Required |
 |------------|---------|----------|
 | Minecraft | 1.21.9 - 1.21.11 | Yes |
-| Fabric Loader | ≥0.18.2 | Yes |
+| Fabric Loader | ≥0.16.0 | Yes |
 | Fabric API | Any | Yes |
 | Cloth Config | Any | Optional |
 | Mod Menu | Any | Optional |
@@ -69,9 +69,9 @@ All keybinds are unbound by default. Set them in **Options > Controls > SimpleFP
 
 | Minecraft | Mod Version | Fabric Loader |
 |-----------|-------------|---------------|
-| 1.21.11 | 1.2.0 | ≥0.18.2 |
-| 1.21.10 | 1.2.0 | ≥0.18.2 |
-| 1.21.9 | 1.2.0 | ≥0.18.2 |
+| 1.21.11 | 1.2.1 | ≥0.16.0 |
+| 1.21.10 | 1.2.1 | ≥0.16.0 |
+| 1.21.9 | 1.2.1 | ≥0.16.0 |
 
 ## License
 
