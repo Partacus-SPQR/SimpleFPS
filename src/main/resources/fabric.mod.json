@@ -1,8 +1,8 @@
 {
 	"schemaVersion": 1,
-	"id": "simplefps",
+	"id": "${id}",
 	"version": "${version}",
-	"name": "SimpleFPS",
+	"name": "${name}",
 	"description": "A lightweight, movable FPS counter with customizable text color, size, and visibility.",
 	"authors": [
 		"Partacus-SPQR"
@@ -25,13 +25,13 @@
 	"mixins": [
 	],
 	"depends": {
-		"fabricloader": ">=0.18.0",
-		"minecraft": "~1.21.11",
+		"fabricloader": ">=0.18.2",
+		"minecraft": "${minecraft}",
 		"java": ">=21",
 		"fabric-api": "*"
 	},
 	"recommends": {
 		"modmenu": "*",
-		"cloth-config": ">=21.11.0"
+		"cloth-config": "*"
 	}
 }

@@ -1,5 +1,21 @@
 package com.simplefps.config;
 
+/**
+ * BACKUP FILE - DO NOT USE IN PRODUCTION
+ * 
+ * This file preserves the original slider implementation for Cloth Config.
+ * Once the Cloth Config author fixes the slider issue, restore this file
+ * by renaming it to ModConfigScreen.java and deleting the text field version.
+ * 
+ * Original: Uses startIntSlider() for opacity and size values
+ * Current: Uses startIntField() as workaround for Cloth Config bug
+ * 
+ * TO RESTORE: 
+ * 1. Delete ModConfigScreen.java
+ * 2. Rename this file to ModConfigScreen.java
+ * 3. Change class name back to ModConfigScreen
+ */
+
 import com.simplefps.SimpleFPSClient;
 import com.simplefps.hud.FPSHudRenderer;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
@@ -13,7 +29,8 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-public class ModConfigScreen {
+// Renamed to avoid class conflict - original name was ModConfigScreen
+class ModConfigScreen_SliderBackup_UNUSED {
 
 	// Flag to suppress saving when reopening from color picker
 	private static boolean skipNextSave = false;
@@ -204,28 +221,28 @@ public class ModConfigScreen {
 				.append(Text.literal("Use the 'Text Color' and 'BG Color' buttons at the bottom-left to pick colors.").formatted(Formatting.WHITE)))
 			.build());
 
-		generalCategory.addEntry(entryBuilder.startIntField(
+		generalCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.textOpacity"),
-			config.textOpacity)
+			config.textOpacity,
+			0, 100)
 			.setDefaultValue(100)
-			.setMin(0)
-			.setMax(100)
 			.setTooltip(Text.translatable("simplefps.config.textOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.textOpacity = newValue)
 			.build());
 
-		// Text size as percentage (50-400 = 0.5x to 4.0x)
+		// Convert textSize (0.5-4.0) to percentage (50-400) for slider
 		int textSizePercent = (int) (config.textSize * 100);
-		generalCategory.addEntry(entryBuilder.startIntField(
+		generalCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.textSize"),
-			textSizePercent)
+			textSizePercent,
+			50, 400)
 			.setDefaultValue(100)
-			.setMin(50)
-			.setMax(400)
 			.setTooltip(
 				Text.translatable("simplefps.config.textSize.tooltip"),
-				Text.literal("50 = half size, 100 = normal, 200 = double").formatted(Formatting.WHITE)
+				Text.literal("50% = half size, 100% = normal, 200% = double").formatted(Formatting.WHITE)
 			)
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.textSize = newValue / 100.0f)
 			.build());
 
@@ -238,13 +255,13 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.showBackground = newValue)
 			.build());
 
-		generalCategory.addEntry(entryBuilder.startIntField(
+		generalCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.backgroundOpacity"),
-			config.backgroundOpacity)
+			config.backgroundOpacity,
+			0, 100)
 			.setDefaultValue(50)
-			.setMin(0)
-			.setMax(100)
 			.setTooltip(Text.translatable("simplefps.config.backgroundOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.backgroundOpacity = newValue)
 			.build());
 
@@ -297,23 +314,23 @@ public class ModConfigScreen {
 			.build());
 
 		int coordTextSizePercent = (int) (config.coordinatesTextSize * 100);
-		coordinatesCategory.addEntry(entryBuilder.startIntField(
+		coordinatesCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.coordinatesTextSize"),
-			coordTextSizePercent)
+			coordTextSizePercent,
+			50, 200)
 			.setDefaultValue(100)
-			.setMin(50)
-			.setMax(200)
 			.setTooltip(Text.translatable("simplefps.config.coordinatesTextSize.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.coordinatesTextSize = newValue / 100.0f)
 			.build());
 
-		coordinatesCategory.addEntry(entryBuilder.startIntField(
+		coordinatesCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.coordinatesTextOpacity"),
-			config.coordinatesTextOpacity)
+			config.coordinatesTextOpacity,
+			0, 100)
 			.setDefaultValue(100)
-			.setMin(0)
-			.setMax(100)
 			.setTooltip(Text.translatable("simplefps.config.coordinatesTextOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.coordinatesTextOpacity = newValue)
 			.build());
 
@@ -325,13 +342,13 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.coordinatesShowBackground = newValue)
 			.build());
 
-		coordinatesCategory.addEntry(entryBuilder.startIntField(
+		coordinatesCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.coordinatesBackgroundOpacity"),
-			config.coordinatesBackgroundOpacity)
+			config.coordinatesBackgroundOpacity,
+			0, 100)
 			.setDefaultValue(50)
-			.setMin(0)
-			.setMax(100)
 			.setTooltip(Text.translatable("simplefps.config.coordinatesBackgroundOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.coordinatesBackgroundOpacity = newValue)
 			.build());
 
@@ -383,23 +400,23 @@ public class ModConfigScreen {
 			.build());
 
 		int biomeTextSizePercent = (int) (config.biomeTextSize * 100);
-		biomeCategory.addEntry(entryBuilder.startIntField(
+		biomeCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.biomeTextSize"),
-			biomeTextSizePercent)
+			biomeTextSizePercent,
+			50, 200)
 			.setDefaultValue(100)
-			.setMin(50)
-			.setMax(200)
 			.setTooltip(Text.translatable("simplefps.config.biomeTextSize.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.biomeTextSize = newValue / 100.0f)
 			.build());
 
-		biomeCategory.addEntry(entryBuilder.startIntField(
+		biomeCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.biomeTextOpacity"),
-			config.biomeTextOpacity)
+			config.biomeTextOpacity,
+			0, 100)
 			.setDefaultValue(100)
-			.setMin(0)
-			.setMax(100)
 			.setTooltip(Text.translatable("simplefps.config.biomeTextOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.biomeTextOpacity = newValue)
 			.build());
 
@@ -411,13 +428,13 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.biomeShowBackground = newValue)
 			.build());
 
-		biomeCategory.addEntry(entryBuilder.startIntField(
+		biomeCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.biomeBackgroundOpacity"),
-			config.biomeBackgroundOpacity)
+			config.biomeBackgroundOpacity,
+			0, 100)
 			.setDefaultValue(50)
-			.setMin(0)
-			.setMax(100)
 			.setTooltip(Text.translatable("simplefps.config.biomeBackgroundOpacity.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.biomeBackgroundOpacity = newValue)
 			.build());
 
@@ -476,13 +493,13 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.graphShowBackground = newValue)
 			.build());
 
-		graphCategory.addEntry(entryBuilder.startIntField(
+		graphCategory.addEntry(entryBuilder.startIntSlider(
 			Text.translatable("simplefps.config.graphScale"),
-			config.graphScale)
+			config.graphScale,
+			50, 200)
 			.setDefaultValue(100)
-			.setMin(50)
-			.setMax(200)
 			.setTooltip(Text.translatable("simplefps.config.graphScale.tooltip"))
+			.setTextGetter(value -> Text.literal(value + "%"))
 			.setSaveConsumer(newValue -> config.graphScale = newValue)
 			.build());
 

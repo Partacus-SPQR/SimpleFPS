@@ -2,20 +2,27 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
-## [1.2.0] - 2024-12-11
+## [1.2.0] - 2024-12-17
 
 ### Added
+- **Multi-version Support** - Now supports Minecraft 1.21.9, 1.21.10, and 1.21.11
 - **Coordinates Display** - Show X/Y/Z position on screen with customizable colors and position
 - **Biome Display** - Show current biome name with customizable colors and position
 - **Cardinal Direction** - Optional compass direction indicator on FPS counter
+- **Tooltip Improvements** - All config tooltips now show default values and valid ranges
 
 ### Changed
-- **Cloth Config color picker** - Removed hex text fields, colors now set exclusively via color picker buttons
+- **Cloth Config sliders → text fields** - Replaced sliders with text input fields (workaround for Cloth Config slider bug)
 - **Config tabs reorganized** - FPS, Coordinates, Biome, Graph, Adaptive, Keybinds
 
 ### Fixed
 - Color picker values now save correctly in Cloth Config
 - Tab order matches logical grouping of settings
+
+### Technical
+- Added Stonecutter 0.5.1 for multi-version build management
+- Converted from Groovy to Kotlin DSL build scripts
+- Backup of original slider implementation preserved for future restoration
 
 ## [1.1.0] - 2024-12-11
 
