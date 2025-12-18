@@ -20,6 +20,7 @@ All notable changes to SimpleFPS will be documented in this file.
 - **HUD position scaling** - Fixed HUD elements overlapping when resizing the Minecraft window
   - Elements now use anchor-based positioning (top-left stays top-left, bottom-right stays bottom-right)
   - Maintains proper spacing regardless of window size
+- **Day counter** - Fixed day number always showing as 1 (now correctly tracks total days played)
 
 ## [1.2.1] - 2024-12-17
 
