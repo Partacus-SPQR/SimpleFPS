@@ -187,30 +187,50 @@ public class SimpleFPSConfig {
 	
 	/**
 	 * Get scaled X position using anchor-based scaling.
-	 * Elements positioned in the left third scale from left, center third stays centered,
-	 * right third scales from right edge.
+	 * Elements positioned in the left half stay anchored to left edge,
+	 * right half stays anchored to right edge.
 	 */
 	private int getScaledX(int originalX, int currentWidth) {
-		if (referenceWidth <= 0 || referenceWidth == currentWidth) {
-			return originalX;
+		if (referenceWidth <= 0) {
+			// No reference set, just clamp to screen
+			return Math.min(originalX, Math.max(0, currentWidth - 50));
 		}
 		
-		// Determine which third of the screen the element was in
-		int leftThird = referenceWidth / 3;
-		int rightThird = referenceWidth * 2 / 3;
+		// Determine if element was in left or right half
+		int halfRef = referenceWidth / 2;
 		
-		if (originalX < leftThird) {
-			// Left third: scale from left edge (keep distance from left)
-			return (int) ((float) originalX / referenceWidth * currentWidth);
-		} else if (originalX > rightThird) {
-			// Right third: scale from right edge (keep distance from right)
-			int distFromRight = referenceWidth - originalX;
-			int scaledDistFromRight = (int) ((float) distFromRight / referenceWidth * currentWidth);
-			return currentWidth - scaledDistFromRight;
+		if (originalX < halfRef) {
+			// Left half: keep absolute position from left edge
+			// But clamp to ensure it stays on screen
+			return Math.min(originalX, Math.max(0, currentWidth - 50));
 		} else {
-			// Center third: keep centered (maintain relative center position)
-			float relativeCenter = (float) originalX / referenceWidth;
-			return (int) (relativeCenter * currentWidth);
+			// Right half: maintain distance from right edge
+			int distFromRight = referenceWidth - originalX;
+			return Math.max(0, currentWidth - distFromRight);
+		}
+	}
+	
+	/**
+	 * Get scaled Y position using anchor-based scaling.
+	 * Elements in top half stay anchored to top, bottom half stays anchored to bottom.
+	 */
+	private int getScaledY(int originalY, int currentHeight) {
+		if (referenceHeight <= 0) {
+			// No reference set, just clamp to screen
+			return Math.min(originalY, Math.max(0, currentHeight - 20));
+		}
+		
+		// Determine if element was in top or bottom half
+		int halfRef = referenceHeight / 2;
+		
+		if (originalY < halfRef) {
+			// Top half: keep absolute position from top edge
+			// But clamp to ensure it stays on screen
+			return Math.min(originalY, Math.max(0, currentHeight - 20));
+		} else {
+			// Bottom half: maintain distance from bottom edge
+			int distFromBottom = referenceHeight - originalY;
+			return Math.max(0, currentHeight - distFromBottom);
 		}
 	}
 	
@@ -225,10 +245,7 @@ public class SimpleFPSConfig {
 	 * Get scaled Y position for FPS counter based on current screen size.
 	 */
 	public int getScaledPositionY(int currentHeight) {
-		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
-			return positionY;
-		}
-		return (int) ((float) positionY / referenceHeight * currentHeight);
+		return getScaledY(positionY, currentHeight);
 	}
 	
 	/**
@@ -242,10 +259,7 @@ public class SimpleFPSConfig {
 	 * Get scaled Y position for Graph based on current screen size.
 	 */
 	public int getScaledGraphY(int currentHeight) {
-		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
-			return graphY;
-		}
-		return (int) ((float) graphY / referenceHeight * currentHeight);
+		return getScaledY(graphY, currentHeight);
 	}
 	
 	/**
@@ -259,10 +273,7 @@ public class SimpleFPSConfig {
 	 * Get scaled Y position for Coordinates based on current screen size.
 	 */
 	public int getScaledCoordinatesY(int currentHeight) {
-		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
-			return coordinatesY;
-		}
-		return (int) ((float) coordinatesY / referenceHeight * currentHeight);
+		return getScaledY(coordinatesY, currentHeight);
 	}
 	
 	/**
@@ -276,10 +287,7 @@ public class SimpleFPSConfig {
 	 * Get scaled Y position for Biome based on current screen size.
 	 */
 	public int getScaledBiomeY(int currentHeight) {
-		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
-			return biomeY;
-		}
-		return (int) ((float) biomeY / referenceHeight * currentHeight);
+		return getScaledY(biomeY, currentHeight);
 	}
 	
 	/**
@@ -293,10 +301,7 @@ public class SimpleFPSConfig {
 	 * Get scaled Y position for Time Clock based on current screen size.
 	 */
 	public int getScaledTimeClockY(int currentHeight) {
-		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
-			return timeClockY;
-		}
-		return (int) ((float) timeClockY / referenceHeight * currentHeight);
+		return getScaledY(timeClockY, currentHeight);
 	}
 	
 	/**
