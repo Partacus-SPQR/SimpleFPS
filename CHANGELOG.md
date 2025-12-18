@@ -16,6 +16,11 @@ All notable changes to SimpleFPS will be documented in this file.
 ### Changed
 - Config tabs reorganized: FPS, Coordinates, Biome, Time Clock, Graph, Adaptive, Keybinds
 
+### Fixed
+- **HUD position scaling** - Fixed HUD elements overlapping when resizing the Minecraft window
+  - Elements now use anchor-based positioning (top-left stays top-left, bottom-right stays bottom-right)
+  - Maintains proper spacing regardless of window size
+
 ## [1.2.1] - 2024-12-17
 
 ### Added
