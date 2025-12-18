@@ -6,6 +6,7 @@ import com.simplefps.hud.FPSGraphRenderer;
 import com.simplefps.hud.FPSHudRenderer;
 import com.simplefps.hud.CoordinatesRenderer;
 import com.simplefps.hud.BiomeRenderer;
+import com.simplefps.hud.TimeClockRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -41,6 +42,7 @@ public class SimpleFPSClient implements ClientModInitializer {
 			FPSGraphRenderer.renderGraph(context, false);
 			CoordinatesRenderer.render(context, false);
 			BiomeRenderer.render(context, false);
+			TimeClockRenderer.render(context, false);
 		});
 		
 		// Register keybindings (all unbound by default)

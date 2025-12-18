@@ -59,12 +59,13 @@ public class ModConfigScreen {
 						button -> {
 							// Get CURRENT tab at click time
 							int clickedTab = configScreen.selectedCategoryIndex;
-							// Only work on tabs 0, 1, 2 (FPS, Coordinates, Biome)
-							if (clickedTab > 2) return;
+							// Only work on tabs 0, 1, 2, 3 (FPS, Coordinates, Biome, Time Clock)
+							if (clickedTab > 3) return;
 							
 							String categoryName = switch (clickedTab) {
 								case 1 -> "Coordinates";
 								case 2 -> "Biome";
+								case 3 -> "Time Clock";
 								default -> "FPS Counter";
 							};
 							
@@ -93,12 +94,13 @@ public class ModConfigScreen {
 						button -> {
 							// Get CURRENT tab at click time
 							int clickedTab = configScreen.selectedCategoryIndex;
-							// Only work on tabs 0, 1, 2 (FPS, Coordinates, Biome)
-							if (clickedTab > 2) return;
+							// Only work on tabs 0, 1, 2, 3 (FPS, Coordinates, Biome, Time Clock)
+							if (clickedTab > 3) return;
 							
 							String categoryName = switch (clickedTab) {
 								case 1 -> "Coordinates";
 								case 2 -> "Biome";
+								case 3 -> "Time Clock";
 								default -> "FPS Counter";
 							};
 							
@@ -132,10 +134,10 @@ public class ModConfigScreen {
 						}
 						
 						// Show/hide color picker buttons based on current tab
-						// Tabs 0, 1, 2 = FPS, Coordinates, Biome (have colors)
-						// Tabs 3, 4, 5 = Graph, Adaptive, Keybinds (no color pickers)
+						// Tabs 0, 1, 2, 3 = FPS, Coordinates, Biome, Time Clock (have colors)
+						// Tabs 4, 5, 6 = Graph, Adaptive, Keybinds (no color pickers)
 						int currentTab = configScreen.selectedCategoryIndex;
-						boolean showColorButtons = currentTab <= 2;
+						boolean showColorButtons = currentTab <= 3;
 						textColorPicker.visible = showColorButtons;
 						bgColorPicker.visible = showColorButtons;
 					});
@@ -446,7 +448,109 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.biomeY = newValue)
 			.build());
 
-		// ==================== FPS Graph Category (Tab 3) ====================
+		// ==================== Time Clock Category (Tab 3) ====================
+		ConfigCategory timeClockCategory = builder.getOrCreateCategory(
+			Text.translatable("simplefps.config.category.timeclock"));
+
+		timeClockCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Note: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Displays the current Minecraft day number and time on screen. Time is synced with the day/night cycle.").formatted(Formatting.WHITE)))
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Colors: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Use the 'Text Color' and 'BG Color' buttons at the bottom-left to pick colors.").formatted(Formatting.WHITE)))
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.timeClockEnabled"),
+			config.timeClockEnabled)
+			.setDefaultValue(false)
+			.setTooltip(Text.translatable("simplefps.config.timeClockEnabled.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockEnabled = newValue)
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.timeClock24Hour"),
+			config.timeClock24Hour)
+			.setDefaultValue(false)
+			.setTooltip(Text.translatable("simplefps.config.timeClock24Hour.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClock24Hour = newValue)
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.timeClockMinimalist"),
+			config.timeClockMinimalist)
+			.setDefaultValue(false)
+			.setTooltip(Text.translatable("simplefps.config.timeClockMinimalist.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockMinimalist = newValue)
+			.build());
+
+		int timeClockTextSizePercent = (int) (config.timeClockTextSize * 100);
+		timeClockCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.timeClockTextSize"),
+			timeClockTextSizePercent)
+			.setDefaultValue(100)
+			.setMin(50)
+			.setMax(200)
+			.setTooltip(Text.translatable("simplefps.config.timeClockTextSize.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockTextSize = newValue / 100.0f)
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.timeClockTextOpacity"),
+			config.timeClockTextOpacity)
+			.setDefaultValue(100)
+			.setMin(0)
+			.setMax(100)
+			.setTooltip(Text.translatable("simplefps.config.timeClockTextOpacity.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockTextOpacity = newValue)
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startBooleanToggle(
+			Text.translatable("simplefps.config.timeClockShowBackground"),
+			config.timeClockShowBackground)
+			.setDefaultValue(true)
+			.setTooltip(Text.translatable("simplefps.config.timeClockShowBackground.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockShowBackground = newValue)
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.timeClockBackgroundOpacity"),
+			config.timeClockBackgroundOpacity)
+			.setDefaultValue(50)
+			.setMin(0)
+			.setMax(100)
+			.setTooltip(Text.translatable("simplefps.config.timeClockBackgroundOpacity.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockBackgroundOpacity = newValue)
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startTextDescription(
+			Text.literal("Position: ").formatted(Formatting.GOLD)
+				.append(Text.literal("Use 'Drag HUD Elements' keybind to visually reposition.").formatted(Formatting.WHITE)))
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.timeClockX"),
+			config.timeClockX)
+			.setDefaultValue(5)
+			.setMin(0)
+			.setMax(3840)
+			.setTooltip(Text.translatable("simplefps.config.timeClockX.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockX = newValue)
+			.build());
+
+		timeClockCategory.addEntry(entryBuilder.startIntField(
+			Text.translatable("simplefps.config.timeClockY"),
+			config.timeClockY)
+			.setDefaultValue(90)
+			.setMin(0)
+			.setMax(2160)
+			.setTooltip(Text.translatable("simplefps.config.timeClockY.tooltip"))
+			.setSaveConsumer(newValue -> config.timeClockY = newValue)
+			.build());
+
+		// ==================== FPS Graph Category (Tab 4) ====================
 		ConfigCategory graphCategory = builder.getOrCreateCategory(
 			Text.translatable("simplefps.config.category.graph"));
 
@@ -531,7 +635,7 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.graphHighFpsThreshold = newValue)
 			.build());
 
-		// ==================== Adaptive Color Category (Tab 4) ====================
+		// ==================== Adaptive Color Category (Tab 5) ====================
 		ConfigCategory adaptiveCategory = builder.getOrCreateCategory(
 			Text.translatable("simplefps.config.category.adaptive"));
 
@@ -574,7 +678,7 @@ public class ModConfigScreen {
 			.setSaveConsumer(newValue -> config.highFpsThreshold = newValue)
 			.build());
 
-		// ==================== Keybindings Category (Tab 5) ====================
+		// ==================== Keybindings Category (Tab 6) ====================
 		ConfigCategory keybindsCategory = builder.getOrCreateCategory(
 			Text.translatable("simplefps.config.category.keybinds"));
 
@@ -612,6 +716,7 @@ public class ModConfigScreen {
 		return switch (category) {
 			case "Coordinates" -> config.coordinatesTextColor;
 			case "Biome" -> config.biomeTextColor;
+			case "Time Clock" -> config.timeClockTextColor;
 			default -> config.textColor; // FPS Counter and others
 		};
 	}
@@ -621,6 +726,7 @@ public class ModConfigScreen {
 		switch (category) {
 			case "Coordinates" -> config.coordinatesTextColor = color;
 			case "Biome" -> config.biomeTextColor = color;
+			case "Time Clock" -> config.timeClockTextColor = color;
 			default -> config.textColor = color; // FPS Counter
 		}
 	}
@@ -630,6 +736,7 @@ public class ModConfigScreen {
 		return switch (category) {
 			case "Coordinates" -> config.coordinatesBackgroundColor;
 			case "Biome" -> config.biomeBackgroundColor;
+			case "Time Clock" -> config.timeClockBackgroundColor;
 			default -> config.backgroundColor; // FPS Counter
 		};
 	}
@@ -639,6 +746,7 @@ public class ModConfigScreen {
 		switch (category) {
 			case "Coordinates" -> config.coordinatesBackgroundColor = color;
 			case "Biome" -> config.biomeBackgroundColor = color;
+			case "Time Clock" -> config.timeClockBackgroundColor = color;
 			default -> config.backgroundColor = color; // FPS Counter
 		}
 	}

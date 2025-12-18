@@ -5,6 +5,7 @@ import com.simplefps.hud.FPSHudRenderer;
 import com.simplefps.hud.FPSGraphRenderer;
 import com.simplefps.hud.CoordinatesRenderer;
 import com.simplefps.hud.BiomeRenderer;
+import com.simplefps.hud.TimeClockRenderer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -21,7 +22,7 @@ public class HudDragScreen extends Screen {
 	private final SimpleFPSConfig config;
 	
 	// Which element is being dragged
-	private enum DragTarget { NONE, FPS, GRAPH, COORDINATES, BIOME }
+	private enum DragTarget { NONE, FPS, GRAPH, COORDINATES, BIOME, TIMECLOCK }
 	private DragTarget currentDrag = DragTarget.NONE;
 	
 	private int dragOffsetX = 0;
@@ -99,12 +100,20 @@ public class HudDragScreen extends Screen {
 				getBiomeWidth(), getBiomeHeight(), currentDrag == DragTarget.BIOME, "Biome");
 		}
 		
+		// Time Clock
+		if (config.timeClockEnabled) {
+			TimeClockRenderer.render(context, true);
+			drawElementBorder(context, config.timeClockX, config.timeClockY,
+				getTimeClockWidth(), getTimeClockHeight(), currentDrag == DragTarget.TIMECLOCK, "Clock");
+		}
+		
 		// Draw hint at bottom
 		String hint = "§7Enabled elements: ";
 		if (config.enabled) hint += "FPS ";
 		if (config.graphEnabled) hint += "Graph ";
 		if (config.coordinatesEnabled) hint += "Coords ";
 		if (config.biomeEnabled) hint += "Biome ";
+		if (config.timeClockEnabled) hint += "Clock ";
 		context.drawCenteredTextWithShadow(this.textRenderer, Text.literal(hint), this.width / 2, this.height - 30, 0xAAAAAA);
 		
 		super.render(context, mouseX, mouseY, delta);
@@ -136,6 +145,18 @@ public class HudDragScreen extends Screen {
 				currentDrag = DragTarget.BIOME;
 				dragOffsetX = mouseX - config.biomeX;
 				dragOffsetY = mouseY - config.biomeY;
+				return;
+			}
+		}
+		
+		// Check Time Clock
+		if (config.timeClockEnabled) {
+			int w = getTimeClockWidth();
+			int h = getTimeClockHeight();
+			if (isInBounds(mouseX, mouseY, config.timeClockX, config.timeClockY, w, h)) {
+				currentDrag = DragTarget.TIMECLOCK;
+				dragOffsetX = mouseX - config.timeClockX;
+				dragOffsetY = mouseY - config.timeClockY;
 				return;
 			}
 		}
@@ -214,6 +235,12 @@ public class HudDragScreen extends Screen {
 				config.biomeX = clamp(mouseX - dragOffsetX, 0, screenWidth - w);
 				config.biomeY = clamp(mouseY - dragOffsetY, 0, screenHeight - h);
 			}
+			case TIMECLOCK -> {
+				int w = getTimeClockWidth();
+				int h = getTimeClockHeight();
+				config.timeClockX = clamp(mouseX - dragOffsetX, 0, screenWidth - w);
+				config.timeClockY = clamp(mouseY - dragOffsetY, 0, screenHeight - h);
+			}
 			case NONE -> {}
 		}
 	}
@@ -270,6 +297,17 @@ public class HudDragScreen extends Screen {
 	private int getBiomeHeight() {
 		MinecraftClient client = MinecraftClient.getInstance();
 		return (int) (client.textRenderer.fontHeight * config.biomeTextSize);
+	}
+	
+	private int getTimeClockWidth() {
+		MinecraftClient client = MinecraftClient.getInstance();
+		String text = TimeClockRenderer.getSampleText(config);
+		return (int) (client.textRenderer.getWidth(text) * config.timeClockTextSize);
+	}
+	
+	private int getTimeClockHeight() {
+		MinecraftClient client = MinecraftClient.getInstance();
+		return (int) (client.textRenderer.fontHeight * config.timeClockTextSize);
 	}
 	
 	@Override

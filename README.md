@@ -3,7 +3,7 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.21.9--1.21.11-green)](https://minecraft.net)
 [![Fabric](https://img.shields.io/badge/Mod%20Loader-Fabric-blue)](https://fabricmc.net)
 [![License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
-[![Version](https://img.shields.io/badge/Version-1.2.1-orange)](https://modrinth.com/project/simplefps)
+[![Version](https://img.shields.io/badge/Version-1.3.0-orange)](https://modrinth.com/project/simplefps)
 
 A lightweight, customizable FPS counter mod for Minecraft (Fabric).
 
@@ -16,6 +16,7 @@ A lightweight, customizable FPS counter mod for Minecraft (Fabric).
 - **FPS Counter** - Real-time FPS display with customizable appearance
 - **Coordinates Display** - Show X/Y/Z position on screen
 - **Biome Display** - Show current biome name
+- **Time Clock** - Show Minecraft day and time (12/24-hour format)
 - **FPS Graph** - Visual FPS history with Min/Max/Avg statistics
 - **Draggable UI** - Position all HUD elements anywhere on screen
 - **Color Picker** - Built-in visual color picker for easy customization
@@ -69,9 +70,9 @@ All keybinds are unbound by default. Set them in **Options > Controls > SimpleFP
 
 | Minecraft | Mod Version | Fabric Loader |
 |-----------|-------------|---------------|
-| 1.21.11 | 1.2.1 | ≥0.16.0 |
-| 1.21.10 | 1.2.1 | ≥0.16.0 |
-| 1.21.9 | 1.2.1 | ≥0.16.0 |
+| 1.21.11 | 1.3.0 | ≥0.16.0 |
+| 1.21.10 | 1.3.0 | ≥0.16.0 |
+| 1.21.9 | 1.3.0 | ≥0.16.0 |
 
 ## License
 

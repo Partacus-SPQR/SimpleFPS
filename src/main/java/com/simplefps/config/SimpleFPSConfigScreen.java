@@ -659,6 +659,171 @@ public class SimpleFPSConfigScreen extends Screen {
 		configRows.add(new ConfigRow(biomeBgOpacitySlider, biomeBgOpacityReset,
 			"Biome background opacity. (Default: 50%)", rowIndex++));
 		
+		// === TIME CLOCK SECTION ===
+		configRows.add(new ConfigRow("§e§l[ Time Clock ]", rowIndex++, true));
+		
+		// Time Clock Enabled toggle
+		ButtonWidget timeClockEnabledBtn = ButtonWidget.builder(
+			Text.literal("Time Clock: " + (config.timeClockEnabled ? "ON" : "OFF")),
+			button -> {
+				config.timeClockEnabled = !config.timeClockEnabled;
+				button.setMessage(Text.literal("Time Clock: " + (config.timeClockEnabled ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget timeClockEnabledReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.timeClockEnabled = false;
+				timeClockEnabledBtn.setMessage(Text.literal("Time Clock: OFF"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockEnabledBtn, timeClockEnabledReset,
+			"Show Minecraft day and time on screen. (Default: OFF)", rowIndex++));
+		
+		// 24-Hour Format toggle
+		ButtonWidget timeClock24HourBtn = ButtonWidget.builder(
+			Text.literal("24-Hour: " + (config.timeClock24Hour ? "ON" : "OFF")),
+			button -> {
+				config.timeClock24Hour = !config.timeClock24Hour;
+				button.setMessage(Text.literal("24-Hour: " + (config.timeClock24Hour ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget timeClock24HourReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.timeClock24Hour = false;
+				timeClock24HourBtn.setMessage(Text.literal("24-Hour: OFF"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClock24HourBtn, timeClock24HourReset,
+			"Use 24-hour format instead of 12-hour. (Default: OFF)", rowIndex++));
+		
+		// Minimalist toggle
+		ButtonWidget timeClockMinimalistBtn = ButtonWidget.builder(
+			Text.literal("Minimalist: " + (config.timeClockMinimalist ? "ON" : "OFF")),
+			button -> {
+				config.timeClockMinimalist = !config.timeClockMinimalist;
+				button.setMessage(Text.literal("Minimalist: " + (config.timeClockMinimalist ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget timeClockMinimalistReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.timeClockMinimalist = false;
+				timeClockMinimalistBtn.setMessage(Text.literal("Minimalist: OFF"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockMinimalistBtn, timeClockMinimalistReset,
+			"Use minimalist format without labels. (Default: OFF)", rowIndex++));
+		
+		// Time Clock Text Color
+		TextFieldWidget timeClockColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
+		timeClockColorField.setText(config.timeClockTextColor);
+		timeClockColorField.setMaxLength(7);
+		
+		ButtonWidget timeClockColorPick = ButtonWidget.builder(
+			Text.literal("Pick"),
+			button -> {
+				client.setScreen(new ColorPickerScreen(this, config.timeClockTextColor, color -> {
+					config.timeClockTextColor = color;
+					timeClockColorField.setText(color);
+				}));
+			}
+		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		
+		ButtonWidget timeClockColorReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.timeClockTextColor = "#FFFFFF";
+				timeClockColorField.setText("#FFFFFF");
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockColorField, timeClockColorPick, timeClockColorReset,
+			"Time clock text color. (Default: #FFFFFF)", rowIndex++));
+		
+		// Time Clock Background toggle
+		ButtonWidget timeClockBgBtn = ButtonWidget.builder(
+			Text.literal("Clock BG: " + (config.timeClockShowBackground ? "ON" : "OFF")),
+			button -> {
+				config.timeClockShowBackground = !config.timeClockShowBackground;
+				button.setMessage(Text.literal("Clock BG: " + (config.timeClockShowBackground ? "ON" : "OFF")));
+			}
+		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		
+		ButtonWidget timeClockBgReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.timeClockShowBackground = true;
+				timeClockBgBtn.setMessage(Text.literal("Clock BG: ON"));
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockBgBtn, timeClockBgReset,
+			"Show background behind time clock. (Default: ON)", rowIndex++));
+		
+		// Time Clock Background Color
+		TextFieldWidget timeClockBgColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
+		timeClockBgColorField.setText(config.timeClockBackgroundColor);
+		timeClockBgColorField.setMaxLength(7);
+		
+		ButtonWidget timeClockBgColorPick = ButtonWidget.builder(
+			Text.literal("Pick"),
+			button -> {
+				client.setScreen(new ColorPickerScreen(this, config.timeClockBackgroundColor, color -> {
+					config.timeClockBackgroundColor = color;
+					timeClockBgColorField.setText(color);
+				}));
+			}
+		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		
+		ButtonWidget timeClockBgColorReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> {
+				config.timeClockBackgroundColor = "#000000";
+				timeClockBgColorField.setText("#000000");
+			}
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockBgColorField, timeClockBgColorPick, timeClockBgColorReset,
+			"Time clock background color. (Default: #000000)", rowIndex++));
+		
+		// Time Clock Text Size slider
+		FloatSlider timeClockSizeSlider = new FloatSlider(widgetX, 0, WIDGET_WIDTH, 20, "Clock Size", 0.5f, 2.0f, config.timeClockTextSize, "x");
+		ButtonWidget timeClockSizeReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> timeClockSizeSlider.setValue(1.0f)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockSizeSlider, timeClockSizeReset,
+			"Time clock text size. (Default: 1.0x)", rowIndex++));
+		
+		// Time Clock Text Opacity slider
+		IntSlider timeClockOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Clock Opacity", 0, 100, config.timeClockTextOpacity, "%");
+		ButtonWidget timeClockOpacityReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> timeClockOpacitySlider.setValue(100, 0, 100)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockOpacitySlider, timeClockOpacityReset,
+			"Time clock text opacity. (Default: 100%)", rowIndex++));
+		
+		// Time Clock Background Opacity slider
+		IntSlider timeClockBgOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Clock BG Op", 0, 100, config.timeClockBackgroundOpacity, "%");
+		ButtonWidget timeClockBgOpacityReset = ButtonWidget.builder(
+			Text.literal("Reset"),
+			button -> timeClockBgOpacitySlider.setValue(50, 0, 100)
+		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		
+		configRows.add(new ConfigRow(timeClockBgOpacitySlider, timeClockBgOpacityReset,
+			"Time clock background opacity. (Default: 50%)", rowIndex++));
+		
 		// Calculate max scroll offset
 		int totalContentHeight = rowIndex * ROW_HEIGHT;
 		maxScrollOffset = Math.max(0, totalContentHeight - visibleHeight);

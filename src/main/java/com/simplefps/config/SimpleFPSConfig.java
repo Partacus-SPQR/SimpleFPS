@@ -73,6 +73,19 @@ public class SimpleFPSConfig {
 	public boolean biomeShowBackground = true;
 	public String biomeBackgroundColor = "#000000";
 	public int biomeBackgroundOpacity = 50;
+	
+	// ==================== Time Clock Options ====================
+	public boolean timeClockEnabled = false;
+	public int timeClockX = 5;
+	public int timeClockY = 90;
+	public String timeClockTextColor = "#FFFFFF";
+	public float timeClockTextSize = 1.0f;
+	public int timeClockTextOpacity = 100;
+	public boolean timeClockShowBackground = true;
+	public String timeClockBackgroundColor = "#000000";
+	public int timeClockBackgroundOpacity = 50;
+	public boolean timeClock24Hour = false;      // false = 12-hour, true = 24-hour
+	public boolean timeClockMinimalist = false;  // false = "Day: X Time: Y", true = "X Y"
 
 	// ==================== Reference Resolution (for scaling) ====================
 	// These store the screen size when positions were last set
@@ -270,6 +283,23 @@ public class SimpleFPSConfig {
 	}
 	
 	/**
+	 * Get scaled X position for Time Clock based on current screen size.
+	 */
+	public int getScaledTimeClockX(int currentWidth) {
+		return getScaledX(timeClockX, currentWidth);
+	}
+	
+	/**
+	 * Get scaled Y position for Time Clock based on current screen size.
+	 */
+	public int getScaledTimeClockY(int currentHeight) {
+		if (referenceHeight <= 0 || referenceHeight == currentHeight) {
+			return timeClockY;
+		}
+		return (int) ((float) timeClockY / referenceHeight * currentHeight);
+	}
+	
+	/**
 	 * Update reference resolution to current screen size.
 	 * Call this when user drags an element to a new position.
 	 */
@@ -326,6 +356,18 @@ public class SimpleFPSConfig {
 		copy.biomeShowBackground = this.biomeShowBackground;
 		copy.biomeBackgroundColor = this.biomeBackgroundColor;
 		copy.biomeBackgroundOpacity = this.biomeBackgroundOpacity;
+		// Time Clock
+		copy.timeClockEnabled = this.timeClockEnabled;
+		copy.timeClockX = this.timeClockX;
+		copy.timeClockY = this.timeClockY;
+		copy.timeClockTextColor = this.timeClockTextColor;
+		copy.timeClockTextSize = this.timeClockTextSize;
+		copy.timeClockTextOpacity = this.timeClockTextOpacity;
+		copy.timeClockShowBackground = this.timeClockShowBackground;
+		copy.timeClockBackgroundColor = this.timeClockBackgroundColor;
+		copy.timeClockBackgroundOpacity = this.timeClockBackgroundOpacity;
+		copy.timeClock24Hour = this.timeClock24Hour;
+		copy.timeClockMinimalist = this.timeClockMinimalist;
 		// Reference resolution
 		copy.referenceWidth = this.referenceWidth;
 		copy.referenceHeight = this.referenceHeight;
@@ -379,6 +421,18 @@ public class SimpleFPSConfig {
 		this.biomeShowBackground = other.biomeShowBackground;
 		this.biomeBackgroundColor = other.biomeBackgroundColor;
 		this.biomeBackgroundOpacity = other.biomeBackgroundOpacity;
+		// Time Clock
+		this.timeClockEnabled = other.timeClockEnabled;
+		this.timeClockX = other.timeClockX;
+		this.timeClockY = other.timeClockY;
+		this.timeClockTextColor = other.timeClockTextColor;
+		this.timeClockTextSize = other.timeClockTextSize;
+		this.timeClockTextOpacity = other.timeClockTextOpacity;
+		this.timeClockShowBackground = other.timeClockShowBackground;
+		this.timeClockBackgroundColor = other.timeClockBackgroundColor;
+		this.timeClockBackgroundOpacity = other.timeClockBackgroundOpacity;
+		this.timeClock24Hour = other.timeClock24Hour;
+		this.timeClockMinimalist = other.timeClockMinimalist;
 		// Reference resolution
 		this.referenceWidth = other.referenceWidth;
 		this.referenceHeight = other.referenceHeight;
@@ -419,6 +473,24 @@ public class SimpleFPSConfig {
 	public int getBiomeBackgroundColorWithAlpha() {
 		int rgb = parseHexColor(biomeBackgroundColor);
 		int alpha = (int) (255 * (biomeBackgroundOpacity / 100.0f));
+		return (alpha << 24) | rgb;
+	}
+	
+	/**
+	 * Get time clock text color with alpha applied.
+	 */
+	public int getTimeClockTextColorWithAlpha() {
+		int rgb = parseHexColor(timeClockTextColor);
+		int alpha = (int) (255 * (timeClockTextOpacity / 100.0f));
+		return (alpha << 24) | rgb;
+	}
+	
+	/**
+	 * Get time clock background color with alpha applied.
+	 */
+	public int getTimeClockBackgroundColorWithAlpha() {
+		int rgb = parseHexColor(timeClockBackgroundColor);
+		int alpha = (int) (255 * (timeClockBackgroundOpacity / 100.0f));
 		return (alpha << 24) | rgb;
 	}
 	

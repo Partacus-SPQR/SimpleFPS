@@ -2,6 +2,20 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
+## [1.3.0] - 2025-01-13
+
+### Added
+- **Time Clock Display** - New HUD element showing Minecraft day number and time
+  - Synced with Minecraft day/night cycle
+  - 12-hour format (7:30 AM) by default with 24-hour toggle (07:30)
+  - Verbose ("Day: 1342 Time: 7:30 AM") and minimalist ("1342 7:30 AM") display modes
+  - Customizable text and background colors with color picker
+  - Draggable positioning like other HUD elements
+  - Full integration with Cloth Config and fallback config screens
+
+### Changed
+- Config tabs reorganized: FPS, Coordinates, Biome, Time Clock, Graph, Adaptive, Keybinds
+
 ## [1.2.1] - 2024-12-17
 
 ### Added
