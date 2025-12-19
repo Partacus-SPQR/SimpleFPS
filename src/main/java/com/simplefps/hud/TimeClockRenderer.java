@@ -36,8 +36,8 @@ public class TimeClockRenderer {
 		
 		TextRenderer textRenderer = client.textRenderer;
 		
-		// Get current time and day
-		String timeText = formatTimeDisplay(client, config);
+		// Get current time and day - pass world directly to ensure fresh reference
+		String timeText = formatTimeDisplay(client.world, config);
 		
 		// Calculate text dimensions with scaling
 		float scale = config.timeClockTextSize;
@@ -82,20 +82,20 @@ public class TimeClockRenderer {
 	/**
 	 * Formats the time display based on config settings.
 	 */
-	private static String formatTimeDisplay(MinecraftClient client, SimpleFPSConfig config) {
-		// getTime() returns total world time since creation
-		// getTimeOfDay() returns time % 24000 (just time of day, not useful for day count)
-		long totalTime = client.world.getTime();
+	private static String formatTimeDisplay(net.minecraft.client.world.ClientWorld world, SimpleFPSConfig config) {
+		// Get the current time of day directly from the world
+		// getTimeOfDay() returns the time within the current day (0-23999)
+		long timeOfDay = world.getTimeOfDay();
+		
+		// Get total time for day calculation
+		long totalTime = world.getTime();
 		
 		// Calculate day number (days start at 1)
 		long dayNumber = (totalTime / 24000L) + 1;
 		
-		// Get time of day (0-23999)
-		long timeOfDay = totalTime % 24000L;
-		
-		// Convert to hours and minutes
-		// Minecraft time: 0 ticks = 6:00 AM, so we add 6 hours offset
-		// Reference: 0=6AM, 6000=12PM, 12000=6PM, 18000=12AM, 23000=5AM
+		// Convert ticks to hours and minutes
+		// Minecraft day cycle: 0=6AM, 6000=12PM, 12000=6PM, 18000=12AM, 24000=6AM (next day)
+		// Formula: (ticks / 1000) gives hours since 6AM, (ticks % 1000) gives fraction of hour
 		int totalMinutes = (int) ((timeOfDay * 24 * 60) / 24000);
 		int hours24 = (totalMinutes / 60 + 6) % 24;
 		int minutes = totalMinutes % 60;

@@ -2,6 +2,13 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
+## [1.3.1] - 2025-12-19
+
+### Fixed
+- **Time Clock synchronization** - Fixed time display not syncing correctly with game time
+  - Now uses `world.getTimeOfDay()` directly for accurate real-time sync
+  - Time updates correctly after sleeping, closing/reopening game, and using `/time set` commands
+
 ## [1.3.0] - 2025-01-13
 
 ### Added
