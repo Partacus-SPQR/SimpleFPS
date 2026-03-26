@@ -1,11 +1,15 @@
 package com.simplefps.config;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -42,7 +46,7 @@ public class ColorPickerScreen extends Screen {
 	private int draggingSlider = -1; // 0=R, 1=G, 2=B
 	
 	// Hex input
-	private TextFieldWidget hexField;
+	private EditBox hexField;
 	
 	// Preset colors
 	private static final String[] PRESET_COLORS = {
@@ -61,7 +65,7 @@ public class ColorPickerScreen extends Screen {
 	private boolean wasMouseDown = false;
 	
 	public ColorPickerScreen(Screen parent, String initialColor, Consumer<String> onColorSelected) {
-		super(Text.literal("Color Picker"));
+		super(Component.literal("Color Picker"));
 		this.parent = parent;
 		this.initialColor = initialColor;
 		this.onColorSelected = onColorSelected;
@@ -111,46 +115,58 @@ public class ColorPickerScreen extends Screen {
 		previewY = sliderStartY + 80;
 		
 		// Hex input field
-		hexField = new TextFieldWidget(textRenderer, sliderStartX, sliderStartY + 60, 80, 16, Text.literal("Hex"));
+		hexField = new EditBox(font, sliderStartX, sliderStartY + 60, 80, 16, Component.literal("Hex"));
 		hexField.setMaxLength(7);
-		hexField.setText(getHexColor());
-		hexField.setChangedListener(text -> {
+		hexField.setValue(getHexColor());
+		hexField.setResponder(text -> {
 			if (text.matches("#[0-9A-Fa-f]{6}")) {
 				parseHexColor(text);
 			}
 		});
-		addDrawableChild(hexField);
+		addRenderableWidget(hexField);
 		
 		// Apply button - calls the callback and closes the picker
-		addDrawableChild(ButtonWidget.builder(Text.literal("Apply"), button -> {
+		addRenderableWidget(Button.builder(Component.literal("Apply"), button -> {
 			onColorSelected.accept(getHexColor());
-			close();
-		}).dimensions(centerX - 55, height - 30, 50, 20).build());
+			onClose();
+		}).bounds(centerX - 55, height - 30, 50, 20).build());
 		
 		// Cancel button
-		addDrawableChild(ButtonWidget.builder(Text.literal("Cancel"), button -> {
-			close();
-		}).dimensions(centerX + 5, height - 30, 50, 20).build());
+		addRenderableWidget(Button.builder(Component.literal("Cancel"), button -> {
+			onClose();
+		}).bounds(centerX + 5, height - 30, 50, 20).build());
 	}
 	
 	@Override
-	public void close() {
-		if (client != null) {
-			client.setScreen(parent);
+	public void onClose() {
+		if (minecraft != null) {
+			minecraft.setScreen(parent);
 		}
 	}
 	
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	//? if >=26.1 {
+	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+	//?} else {
+	/*public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	*///?}
 		// Draw semi-transparent background
 		context.fill(0, 0, width, height, 0xCC000000);
 		
 		// Title
-		context.drawCenteredTextWithShadow(textRenderer, "Color Picker", width / 2, 10, 0xFFFFFF);
+		//? if >=26.1 {
+		context.centeredText(font, "Color Picker", width / 2, 10, 0xFFFFFF);
+		//?} else {
+		/*context.drawCenteredString(font, "Color Picker", width / 2, 10, 0xFFFFFF);
+		*///?}
 		
 		// Note about auto-save above buttons (draw after everything else so it's on top)
 		String noteText = "Note: Clicking Apply automatically saves the value.";
-		context.drawCenteredTextWithShadow(textRenderer, noteText, width / 2, height - 55, 0xFFFFAA00);
+		//? if >=26.1 {
+		context.centeredText(font, noteText, width / 2, height - 55, 0xFFFFAA00);
+		//?} else {
+		/*context.drawCenteredString(font, noteText, width / 2, height - 55, 0xFFFFAA00);
+		*///?}
 		
 		// Draw color wheel (simplified as color grid)
 		renderColorWheel(context, mouseX, mouseY);
@@ -162,7 +178,11 @@ public class ColorPickerScreen extends Screen {
 		renderRGBSliders(context, mouseX, mouseY);
 		
 		// Draw preview
-		context.drawTextWithShadow(textRenderer, "Preview:", previewX, previewY - 12, 0xAAAAAA);
+		//? if >=26.1 {
+		context.text(font, "Preview:", previewX, previewY - 12, 0xAAAAAA);
+		//?} else {
+		/*context.drawString(font, "Preview:", previewX, previewY - 12, 0xAAAAAA);
+		*///?}
 		int previewColor = 0xFF000000 | (red << 16) | (green << 8) | blue;
 		context.fill(previewX, previewY, previewX + PREVIEW_SIZE, previewY + PREVIEW_SIZE, previewColor);
 		// Border
@@ -175,16 +195,29 @@ public class ColorPickerScreen extends Screen {
 		renderPresets(context, mouseX, mouseY);
 		
 		// Labels
-		context.drawTextWithShadow(textRenderer, "Hex:", sliderStartX - 30, sliderStartY + 64, 0xAAAAAA);
+		//? if >=26.1 {
+		context.text(font, "Hex:", sliderStartX - 30, sliderStartY + 64, 0xAAAAAA);
+		//?} else {
+		/*context.drawString(font, "Hex:", sliderStartX - 30, sliderStartY + 64, 0xAAAAAA);
+		*///?}
 		
 		// Handle mouse input
 		handleMouseInput(mouseX, mouseY);
 		
-		super.render(context, mouseX, mouseY, delta);
+		//? if >=26.1 {
+		super.extractRenderState(context, mouseX, mouseY, delta);
+		//?} else {
+		/*super.render(context, mouseX, mouseY, delta);
+		*///?}
 	}
 	
-	private void renderColorWheel(DrawContext context, int mouseX, int mouseY) {
-		context.drawTextWithShadow(textRenderer, "Color Wheel:", wheelX, wheelY - 12, 0xAAAAAA);
+	//? if >=26.1 {
+	private void renderColorWheel(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+		context.text(font, "Color Wheel:", wheelX, wheelY - 12, 0xAAAAAA);
+	//?} else {
+	/*private void renderColorWheel(GuiGraphics context, int mouseX, int mouseY) {
+		context.drawString(font, "Color Wheel:", wheelX, wheelY - 12, 0xAAAAAA);
+	*///?}
 		
 		// Draw a simplified HSV color grid
 		int gridSize = 10;
@@ -212,8 +245,13 @@ public class ColorPickerScreen extends Screen {
 		context.fill(wheelX + WHEEL_SIZE, wheelY, wheelX + WHEEL_SIZE + 1, wheelY + WHEEL_SIZE, 0xFFFFFFFF);
 	}
 	
-	private void renderBrightnessSlider(DrawContext context, int mouseX, int mouseY) {
-		context.drawTextWithShadow(textRenderer, "Brightness", brightnessSliderX - 5, wheelY - 12, 0xAAAAAA);
+	//? if >=26.1 {
+	private void renderBrightnessSlider(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+		context.text(font, "Brightness", brightnessSliderX - 5, wheelY - 12, 0xAAAAAA);
+	//?} else {
+	/*private void renderBrightnessSlider(GuiGraphics context, int mouseX, int mouseY) {
+		context.drawString(font, "Brightness", brightnessSliderX - 5, wheelY - 12, 0xAAAAAA);
+	*///?}
 		
 		// Draw gradient from white to black
 		for (int i = 0; i < BRIGHTNESS_HEIGHT; i++) {
@@ -234,26 +272,59 @@ public class ColorPickerScreen extends Screen {
 		context.fill(brightnessSliderX - 3, indicatorY - 2, brightnessSliderX + BRIGHTNESS_WIDTH + 3, indicatorY + 2, 0xFFFFFFFF);
 	}
 	
-	private void renderRGBSliders(DrawContext context, int mouseX, int mouseY) {
-		context.drawTextWithShadow(textRenderer, "RGB Sliders:", sliderStartX, sliderStartY - 25, 0xAAAAAA);
+	//? if >=26.1 {
+	private void renderRGBSliders(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+		context.text(font, "RGB Sliders:", sliderStartX, sliderStartY - 25, 0xAAAAAA);
+	//?} else {
+	/*private void renderRGBSliders(GuiGraphics context, int mouseX, int mouseY) {
+		context.drawString(font, "RGB Sliders:", sliderStartX, sliderStartY - 25, 0xAAAAAA);
+	*///?}
 		
 		// Red slider
-		context.drawTextWithShadow(textRenderer, "R:", sliderStartX - 15, sliderStartY + 4, 0xFF5555);
+		//? if >=26.1 {
+		context.text(font, "R:", sliderStartX - 15, sliderStartY + 4, 0xFF5555);
+		//?} else {
+		/*context.drawString(font, "R:", sliderStartX - 15, sliderStartY + 4, 0xFF5555);
+		*///?}
 		renderSlider(context, sliderStartX, sliderStartY, red, 0xFFFF0000);
-		context.drawTextWithShadow(textRenderer, String.valueOf(red), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 4, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(font, String.valueOf(red), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 4, 0xFFFFFF);
+		//?} else {
+		/*context.drawString(font, String.valueOf(red), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 4, 0xFFFFFF);
+		*///?}
 		
 		// Green slider
-		context.drawTextWithShadow(textRenderer, "G:", sliderStartX - 15, sliderStartY + 20 + 4, 0x55FF55);
+		//? if >=26.1 {
+		context.text(font, "G:", sliderStartX - 15, sliderStartY + 20 + 4, 0x55FF55);
+		//?} else {
+		/*context.drawString(font, "G:", sliderStartX - 15, sliderStartY + 20 + 4, 0x55FF55);
+		*///?}
 		renderSlider(context, sliderStartX, sliderStartY + 20, green, 0xFF00FF00);
-		context.drawTextWithShadow(textRenderer, String.valueOf(green), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 20 + 4, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(font, String.valueOf(green), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 20 + 4, 0xFFFFFF);
+		//?} else {
+		/*context.drawString(font, String.valueOf(green), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 20 + 4, 0xFFFFFF);
+		*///?}
 		
 		// Blue slider
-		context.drawTextWithShadow(textRenderer, "B:", sliderStartX - 15, sliderStartY + 40 + 4, 0x5555FF);
+		//? if >=26.1 {
+		context.text(font, "B:", sliderStartX - 15, sliderStartY + 40 + 4, 0x5555FF);
+		//?} else {
+		/*context.drawString(font, "B:", sliderStartX - 15, sliderStartY + 40 + 4, 0x5555FF);
+		*///?}
 		renderSlider(context, sliderStartX, sliderStartY + 40, blue, 0xFF0000FF);
-		context.drawTextWithShadow(textRenderer, String.valueOf(blue), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 40 + 4, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(font, String.valueOf(blue), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 40 + 4, 0xFFFFFF);
+		//?} else {
+		/*context.drawString(font, String.valueOf(blue), sliderStartX + SLIDER_WIDTH + 5, sliderStartY + 40 + 4, 0xFFFFFF);
+		*///?}
 	}
 	
-	private void renderSlider(DrawContext context, int x, int y, int value, int color) {
+	//? if >=26.1 {
+	private void renderSlider(GuiGraphicsExtractor context, int x, int y, int value, int color) {
+	//?} else {
+	/*private void renderSlider(GuiGraphics context, int x, int y, int value, int color) {
+	*///?}
 		// Background
 		context.fill(x, y, x + SLIDER_WIDTH, y + SLIDER_HEIGHT, 0xFF333333);
 		
@@ -272,8 +343,13 @@ public class ColorPickerScreen extends Screen {
 		context.fill(handleX, y - 2, handleX + 4, y + SLIDER_HEIGHT + 2, 0xFFFFFFFF);
 	}
 	
-	private void renderPresets(DrawContext context, int mouseX, int mouseY) {
-		context.drawTextWithShadow(textRenderer, "Presets:", presetsX, presetsY - 12, 0xAAAAAA);
+	//? if >=26.1 {
+	private void renderPresets(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+		context.text(font, "Presets:", presetsX, presetsY - 12, 0xAAAAAA);
+	//?} else {
+	/*private void renderPresets(GuiGraphics context, int mouseX, int mouseY) {
+		context.drawString(font, "Presets:", presetsX, presetsY - 12, 0xAAAAAA);
+	*///?}
 		
 		int cols = 10;
 		int size = 18;
@@ -304,10 +380,10 @@ public class ColorPickerScreen extends Screen {
 	}
 	
 	private void handleMouseInput(int mouseX, int mouseY) {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		if (client == null) return;
 		
-		long windowHandle = client.getWindow().getHandle();
+		long windowHandle = client.getWindow().handle();
 		boolean mouseDown = GLFW.glfwGetMouseButton(windowHandle, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		boolean justClicked = mouseDown && !wasMouseDown;
 		wasMouseDown = mouseDown;
@@ -335,7 +411,7 @@ public class ColorPickerScreen extends Screen {
 			red = rgb[0];
 			green = rgb[1];
 			blue = rgb[2];
-			hexField.setText(getHexColor());
+			hexField.setValue(getHexColor());
 		}
 		
 		if (!mouseDown) {
@@ -352,7 +428,7 @@ public class ColorPickerScreen extends Screen {
 		
 		if (draggingBrightness && mouseDown) {
 			brightness = 1.0f - (float) Math.max(0, Math.min(BRIGHTNESS_HEIGHT, mouseY - brightnessSliderY)) / BRIGHTNESS_HEIGHT;
-			hexField.setText(getHexColor());
+			hexField.setValue(getHexColor());
 		}
 		
 		if (!mouseDown) {
@@ -377,7 +453,7 @@ public class ColorPickerScreen extends Screen {
 				case 1 -> green = value;
 				case 2 -> blue = value;
 			}
-			hexField.setText(getHexColor());
+			hexField.setValue(getHexColor());
 		}
 		
 		if (!mouseDown) {
@@ -398,7 +474,7 @@ public class ColorPickerScreen extends Screen {
 				
 				if (mouseX >= x && mouseX < x + size && mouseY >= y && mouseY < y + size) {
 					parseHexColor(PRESET_COLORS[i]);
-					hexField.setText(getHexColor());
+					hexField.setValue(getHexColor());
 					break;
 				}
 			}

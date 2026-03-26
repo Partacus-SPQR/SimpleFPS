@@ -1,14 +1,18 @@
 package com.simplefps.config;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.option.KeybindsScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.SliderWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.input.MouseButtonEvent;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.AbstractSliderButton;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,11 +53,11 @@ public class SimpleFPSConfigScreen extends Screen {
 	private final List<ConfigRow> configRows = new ArrayList<>();
 	
 	// Widget references for saving
-	private TextFieldWidget textColorField;
-	private TextFieldWidget bgColorField;
+	private EditBox textColorField;
+	private EditBox bgColorField;
 	
 	public SimpleFPSConfigScreen(Screen parent) {
-		super(Text.literal("SimpleFPS Configuration"));
+		super(Component.literal("SimpleFPS Configuration"));
 		this.parent = parent;
 		this.config = SimpleFPSConfig.getInstance();
 	}
@@ -75,175 +79,175 @@ public class SimpleFPSConfigScreen extends Screen {
 		int rowIndex = 0;
 		
 		// === GENERAL SECTION ===
-		configRows.add(new ConfigRow("§e§l[ General ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ General ]", rowIndex++, true));
 		
 		// Enabled toggle
-		ButtonWidget enabledBtn = ButtonWidget.builder(
-			Text.literal("Enabled: " + (config.enabled ? "ON" : "OFF")),
+		Button enabledBtn = Button.builder(
+			Component.literal("Enabled: " + (config.enabled ? "ON" : "OFF")),
 			button -> {
 				config.enabled = !config.enabled;
-				button.setMessage(Text.literal("Enabled: " + (config.enabled ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Enabled: " + (config.enabled ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget enabledReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button enabledReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.enabled = true;
-				enabledBtn.setMessage(Text.literal("Enabled: ON"));
+				enabledBtn.setMessage(Component.literal("Enabled: ON"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(enabledBtn, enabledReset, 
 			"Toggle the FPS counter visibility. (Default: ON)", rowIndex++));
 		
 		// Show Label toggle
-		ButtonWidget showLabelBtn = ButtonWidget.builder(
-			Text.literal("Show Label: " + (config.showLabel ? "ON" : "OFF")),
+		Button showLabelBtn = Button.builder(
+			Component.literal("Show Label: " + (config.showLabel ? "ON" : "OFF")),
 			button -> {
 				config.showLabel = !config.showLabel;
-				button.setMessage(Text.literal("Show Label: " + (config.showLabel ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Show Label: " + (config.showLabel ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget showLabelReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button showLabelReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.showLabel = true;
-				showLabelBtn.setMessage(Text.literal("Show Label: ON"));
+				showLabelBtn.setMessage(Component.literal("Show Label: ON"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(showLabelBtn, showLabelReset,
 			"Show 'FPS: ' label before the number. (Default: ON)", rowIndex++));
 		
 		// Show Direction toggle
-		ButtonWidget showDirectionBtn = ButtonWidget.builder(
-			Text.literal("Show Direction: " + (config.showDirection ? "ON" : "OFF")),
+		Button showDirectionBtn = Button.builder(
+			Component.literal("Show Direction: " + (config.showDirection ? "ON" : "OFF")),
 			button -> {
 				config.showDirection = !config.showDirection;
-				button.setMessage(Text.literal("Show Direction: " + (config.showDirection ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Show Direction: " + (config.showDirection ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget showDirectionReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button showDirectionReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.showDirection = false;
-				showDirectionBtn.setMessage(Text.literal("Show Direction: OFF"));
+				showDirectionBtn.setMessage(Component.literal("Show Direction: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(showDirectionBtn, showDirectionReset,
 			"Show facing direction (N/E/S/W) after FPS. (Default: OFF)", rowIndex++));
 		
 		// === APPEARANCE SECTION ===
-		configRows.add(new ConfigRow("§e§l[ Appearance ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ Appearance ]", rowIndex++, true));
 		
 		// Text Color
-		textColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		textColorField.setText(config.textColor);
+		textColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		textColorField.setValue(config.textColor);
 		textColorField.setMaxLength(7);
 		
-		ButtonWidget textColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button textColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.textColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.textColor, color -> {
 					config.textColor = color;
-					textColorField.setText(color);
+					textColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget textColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button textColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.textColor = "#FFFFFF";
-				textColorField.setText("#FFFFFF");
+				textColorField.setValue("#FFFFFF");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(textColorField, textColorPick, textColorReset,
 			"The color of the FPS text in hex format. (Default: #FFFFFF)", rowIndex++));
 		
 		// Background toggle
-		ButtonWidget showBackgroundBtn = ButtonWidget.builder(
-			Text.literal("Background: " + (config.showBackground ? "ON" : "OFF")),
+		Button showBackgroundBtn = Button.builder(
+			Component.literal("Background: " + (config.showBackground ? "ON" : "OFF")),
 			button -> {
 				config.showBackground = !config.showBackground;
-				button.setMessage(Text.literal("Background: " + (config.showBackground ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Background: " + (config.showBackground ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget showBackgroundReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button showBackgroundReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.showBackground = true;
-				showBackgroundBtn.setMessage(Text.literal("Background: ON"));
+				showBackgroundBtn.setMessage(Component.literal("Background: ON"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(showBackgroundBtn, showBackgroundReset,
 			"Show a background behind the FPS text. (Default: ON)", rowIndex++));
 		
 		// Background Color
-		bgColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		bgColorField.setText(config.backgroundColor);
+		bgColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		bgColorField.setValue(config.backgroundColor);
 		bgColorField.setMaxLength(7);
 		
-		ButtonWidget bgColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button bgColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.backgroundColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.backgroundColor, color -> {
 					config.backgroundColor = color;
-					bgColorField.setText(color);
+					bgColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget bgColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button bgColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.backgroundColor = "#000000";
-				bgColorField.setText("#000000");
+				bgColorField.setValue("#000000");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(bgColorField, bgColorPick, bgColorReset,
 			"The background color in hex format. (Default: #000000)", rowIndex++));
 		
 		// Text Size slider (0.5 to 2.0)
 		FloatSlider textSizeSlider = new FloatSlider(widgetX, 0, WIDGET_WIDTH, 20, "Text Size", 0.5f, 2.0f, config.textSize, "x");
-		ButtonWidget textSizeReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button textSizeReset = Button.builder(
+			Component.literal("Reset"),
 			button -> textSizeSlider.setValue(1.0f)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(textSizeSlider, textSizeReset,
 			"Scale of the FPS text. (Default: 1.0x)", rowIndex++));
 		
 		// Text Opacity slider
 		IntSlider textOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Text Opacity", 0, 100, config.textOpacity, "%");
-		ButtonWidget textOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button textOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> textOpacitySlider.setValue(100, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(textOpacitySlider, textOpacityReset,
 			"Opacity of the FPS text. (Default: 100%)", rowIndex++));
 		
 		// Background Opacity slider
 		IntSlider bgOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "BG Opacity", 0, 100, config.backgroundOpacity, "%");
-		ButtonWidget bgOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button bgOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> bgOpacitySlider.setValue(50, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(bgOpacitySlider, bgOpacityReset,
 			"Opacity of the background. (Default: 50%)", rowIndex++));
 		
 		// === POSITION SECTION ===
-		configRows.add(new ConfigRow("§e§l[ Position ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ Position ]", rowIndex++, true));
 		
 		// Get screen dimensions for slider max values
 		int screenWidth = this.width;
@@ -252,10 +256,10 @@ public class SimpleFPSConfigScreen extends Screen {
 		// Position X slider
 		IntSlider posXSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Position X", 0, screenWidth, config.positionX, " px");
 		final int posXMax = screenWidth;
-		ButtonWidget posXReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button posXReset = Button.builder(
+			Component.literal("Reset"),
 			button -> posXSlider.setValue(5, 0, posXMax)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(posXSlider, posXReset,
 			"Horizontal position in pixels. (Default: 5)", rowIndex++));
@@ -263,96 +267,96 @@ public class SimpleFPSConfigScreen extends Screen {
 		// Position Y slider
 		IntSlider posYSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Position Y", 0, screenHeight, config.positionY, " px");
 		final int posYMax = screenHeight;
-		ButtonWidget posYReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button posYReset = Button.builder(
+			Component.literal("Reset"),
 			button -> posYSlider.setValue(5, 0, posYMax)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(posYSlider, posYReset,
 			"Vertical position in pixels. (Default: 5)", rowIndex++));
 		
 		// === ADAPTIVE COLORS SECTION ===
-		configRows.add(new ConfigRow("§e§l[ Adaptive Colors ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ Adaptive Colors ]", rowIndex++, true));
 		
 		// Adaptive toggle
-		ButtonWidget adaptiveBtn = ButtonWidget.builder(
-			Text.literal("Adaptive Colors: " + (config.adaptiveColorEnabled ? "ON" : "OFF")),
+		Button adaptiveBtn = Button.builder(
+			Component.literal("Adaptive Colors: " + (config.adaptiveColorEnabled ? "ON" : "OFF")),
 			button -> {
 				config.adaptiveColorEnabled = !config.adaptiveColorEnabled;
-				button.setMessage(Text.literal("Adaptive Colors: " + (config.adaptiveColorEnabled ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Adaptive Colors: " + (config.adaptiveColorEnabled ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget adaptiveReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button adaptiveReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.adaptiveColorEnabled = false;
-				adaptiveBtn.setMessage(Text.literal("Adaptive Colors: OFF"));
+				adaptiveBtn.setMessage(Component.literal("Adaptive Colors: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(adaptiveBtn, adaptiveReset,
 			"Change text color based on FPS (red=low, green=high). (Default: OFF)", rowIndex++));
 		
 		// Low FPS Threshold slider
 		IntSlider lowFpsSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Low FPS", 1, 120, config.lowFpsThreshold, " FPS");
-		ButtonWidget lowFpsReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button lowFpsReset = Button.builder(
+			Component.literal("Reset"),
 			button -> lowFpsSlider.setValue(25, 1, 120)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(lowFpsSlider, lowFpsReset,
 			"FPS at or below this shows as red. (Default: 25)", rowIndex++));
 		
 		// High FPS Threshold slider
 		IntSlider highFpsSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "High FPS", 1, 300, config.highFpsThreshold, " FPS");
-		ButtonWidget highFpsReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button highFpsReset = Button.builder(
+			Component.literal("Reset"),
 			button -> highFpsSlider.setValue(60, 1, 300)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(highFpsSlider, highFpsReset,
 			"FPS at or above this shows as green. (Default: 60)", rowIndex++));
 		
 		// === FPS GRAPH SECTION ===
-		configRows.add(new ConfigRow("§e§l[ FPS Graph ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ FPS Graph ]", rowIndex++, true));
 		
 		// Graph Enabled toggle
-		ButtonWidget graphEnabledBtn = ButtonWidget.builder(
-			Text.literal("Graph Enabled: " + (config.graphEnabled ? "ON" : "OFF")),
+		Button graphEnabledBtn = Button.builder(
+			Component.literal("Graph Enabled: " + (config.graphEnabled ? "ON" : "OFF")),
 			button -> {
 				config.graphEnabled = !config.graphEnabled;
-				button.setMessage(Text.literal("Graph Enabled: " + (config.graphEnabled ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Graph Enabled: " + (config.graphEnabled ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget graphEnabledReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button graphEnabledReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.graphEnabled = false;
-				graphEnabledBtn.setMessage(Text.literal("Graph Enabled: OFF"));
+				graphEnabledBtn.setMessage(Component.literal("Graph Enabled: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphEnabledBtn, graphEnabledReset,
 			"Show a real-time FPS graph on screen. (Default: OFF)", rowIndex++));
 		
 		// Graph Background toggle
-		ButtonWidget graphBgBtn = ButtonWidget.builder(
-			Text.literal("Graph Background: " + (config.graphShowBackground ? "ON" : "OFF")),
+		Button graphBgBtn = Button.builder(
+			Component.literal("Graph Background: " + (config.graphShowBackground ? "ON" : "OFF")),
 			button -> {
 				config.graphShowBackground = !config.graphShowBackground;
-				button.setMessage(Text.literal("Graph Background: " + (config.graphShowBackground ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Graph Background: " + (config.graphShowBackground ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget graphBgReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button graphBgReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.graphShowBackground = true;
-				graphBgBtn.setMessage(Text.literal("Graph Background: ON"));
+				graphBgBtn.setMessage(Component.literal("Graph Background: ON"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphBgBtn, graphBgReset,
 			"Show a background behind the FPS graph. (Default: ON)", rowIndex++));
@@ -360,10 +364,10 @@ public class SimpleFPSConfigScreen extends Screen {
 		// Graph X slider
 		IntSlider graphXSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph X", 0, screenWidth, config.graphX, " px");
 		final int graphXMax = screenWidth;
-		ButtonWidget graphXReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button graphXReset = Button.builder(
+			Component.literal("Reset"),
 			button -> graphXSlider.setValue(5, 0, graphXMax)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphXSlider, graphXReset,
 			"Graph horizontal position in pixels. (Default: 5)", rowIndex++));
@@ -371,455 +375,455 @@ public class SimpleFPSConfigScreen extends Screen {
 		// Graph Y slider
 		IntSlider graphYSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph Y", 0, screenHeight, config.graphY, " px");
 		final int graphYMax = screenHeight;
-		ButtonWidget graphYReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button graphYReset = Button.builder(
+			Component.literal("Reset"),
 			button -> graphYSlider.setValue(100, 0, graphYMax)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphYSlider, graphYReset,
 			"Graph vertical position in pixels. (Default: 100)", rowIndex++));
 		
 		// Graph Scale slider
 		IntSlider graphScaleSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph Scale", 50, 200, config.graphScale, "%");
-		ButtonWidget graphScaleReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button graphScaleReset = Button.builder(
+			Component.literal("Reset"),
 			button -> graphScaleSlider.setValue(100, 50, 200)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphScaleSlider, graphScaleReset,
 			"Scale of the FPS graph. (Default: 100%)", rowIndex++));
 		
 		// Graph Low FPS slider
 		IntSlider graphLowFpsSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph Low", 1, 120, config.graphLowFpsThreshold, " FPS");
-		ButtonWidget graphLowFpsReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button graphLowFpsReset = Button.builder(
+			Component.literal("Reset"),
 			button -> graphLowFpsSlider.setValue(30, 1, 120)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphLowFpsSlider, graphLowFpsReset,
 			"Low FPS threshold for graph coloring. (Default: 30)", rowIndex++));
 		
 		// Graph High FPS slider
 		IntSlider graphHighFpsSlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Graph High", 1, 300, config.graphHighFpsThreshold, " FPS");
-		ButtonWidget graphHighFpsReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button graphHighFpsReset = Button.builder(
+			Component.literal("Reset"),
 			button -> graphHighFpsSlider.setValue(60, 1, 300)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(graphHighFpsSlider, graphHighFpsReset,
 			"High FPS threshold for graph coloring. (Default: 60)", rowIndex++));
 		
 		// === COORDINATES SECTION ===
-		configRows.add(new ConfigRow("§e§l[ Coordinates ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ Coordinates ]", rowIndex++, true));
 		
 		// Coordinates Enabled toggle
-		ButtonWidget coordEnabledBtn = ButtonWidget.builder(
-			Text.literal("Coordinates: " + (config.coordinatesEnabled ? "ON" : "OFF")),
+		Button coordEnabledBtn = Button.builder(
+			Component.literal("Coordinates: " + (config.coordinatesEnabled ? "ON" : "OFF")),
 			button -> {
 				config.coordinatesEnabled = !config.coordinatesEnabled;
-				button.setMessage(Text.literal("Coordinates: " + (config.coordinatesEnabled ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Coordinates: " + (config.coordinatesEnabled ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget coordEnabledReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button coordEnabledReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.coordinatesEnabled = false;
-				coordEnabledBtn.setMessage(Text.literal("Coordinates: OFF"));
+				coordEnabledBtn.setMessage(Component.literal("Coordinates: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(coordEnabledBtn, coordEnabledReset,
 			"Show X/Y/Z coordinates on screen. (Default: OFF)", rowIndex++));
 		
 		// Coordinates Text Color
-		TextFieldWidget coordColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		coordColorField.setText(config.coordinatesTextColor);
+		EditBox coordColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		coordColorField.setValue(config.coordinatesTextColor);
 		coordColorField.setMaxLength(7);
 		
-		ButtonWidget coordColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button coordColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.coordinatesTextColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.coordinatesTextColor, color -> {
 					config.coordinatesTextColor = color;
-					coordColorField.setText(color);
+					coordColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget coordColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button coordColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.coordinatesTextColor = "#FFFFFF";
-				coordColorField.setText("#FFFFFF");
+				coordColorField.setValue("#FFFFFF");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(coordColorField, coordColorPick, coordColorReset,
 			"Coordinates text color. (Default: #FFFFFF)", rowIndex++));
 		
 		// Coordinates Background toggle
-		ButtonWidget coordBgBtn = ButtonWidget.builder(
-			Text.literal("Coord BG: " + (config.coordinatesShowBackground ? "ON" : "OFF")),
+		Button coordBgBtn = Button.builder(
+			Component.literal("Coord BG: " + (config.coordinatesShowBackground ? "ON" : "OFF")),
 			button -> {
 				config.coordinatesShowBackground = !config.coordinatesShowBackground;
-				button.setMessage(Text.literal("Coord BG: " + (config.coordinatesShowBackground ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Coord BG: " + (config.coordinatesShowBackground ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget coordBgReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button coordBgReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.coordinatesShowBackground = true;
-				coordBgBtn.setMessage(Text.literal("Coord BG: ON"));
+				coordBgBtn.setMessage(Component.literal("Coord BG: ON"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(coordBgBtn, coordBgReset,
 			"Show background behind coordinates. (Default: ON)", rowIndex++));
 		
 		// Coordinates Background Color
-		TextFieldWidget coordBgColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		coordBgColorField.setText(config.coordinatesBackgroundColor);
+		EditBox coordBgColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		coordBgColorField.setValue(config.coordinatesBackgroundColor);
 		coordBgColorField.setMaxLength(7);
 		
-		ButtonWidget coordBgColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button coordBgColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.coordinatesBackgroundColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.coordinatesBackgroundColor, color -> {
 					config.coordinatesBackgroundColor = color;
-					coordBgColorField.setText(color);
+					coordBgColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget coordBgColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button coordBgColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.coordinatesBackgroundColor = "#000000";
-				coordBgColorField.setText("#000000");
+				coordBgColorField.setValue("#000000");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(coordBgColorField, coordBgColorPick, coordBgColorReset,
 			"Coordinates background color. (Default: #000000)", rowIndex++));
 		
 		// Coordinates Text Size slider
 		FloatSlider coordSizeSlider = new FloatSlider(widgetX, 0, WIDGET_WIDTH, 20, "Coord Size", 0.5f, 2.0f, config.coordinatesTextSize, "x");
-		ButtonWidget coordSizeReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button coordSizeReset = Button.builder(
+			Component.literal("Reset"),
 			button -> coordSizeSlider.setValue(1.0f)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(coordSizeSlider, coordSizeReset,
 			"Coordinates text size. (Default: 1.0x)", rowIndex++));
 		
 		// Coordinates Text Opacity slider
 		IntSlider coordOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Coord Opacity", 0, 100, config.coordinatesTextOpacity, "%");
-		ButtonWidget coordOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button coordOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> coordOpacitySlider.setValue(100, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(coordOpacitySlider, coordOpacityReset,
 			"Coordinates text opacity. (Default: 100%)", rowIndex++));
 		
 		// Coordinates Background Opacity slider
 		IntSlider coordBgOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Coord BG Op", 0, 100, config.coordinatesBackgroundOpacity, "%");
-		ButtonWidget coordBgOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button coordBgOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> coordBgOpacitySlider.setValue(50, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(coordBgOpacitySlider, coordBgOpacityReset,
 			"Coordinates background opacity. (Default: 50%)", rowIndex++));
 		
 		// === BIOME SECTION ===
-		configRows.add(new ConfigRow("§e§l[ Biome ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ Biome ]", rowIndex++, true));
 		
 		// Biome Enabled toggle
-		ButtonWidget biomeEnabledBtn = ButtonWidget.builder(
-			Text.literal("Biome: " + (config.biomeEnabled ? "ON" : "OFF")),
+		Button biomeEnabledBtn = Button.builder(
+			Component.literal("Biome: " + (config.biomeEnabled ? "ON" : "OFF")),
 			button -> {
 				config.biomeEnabled = !config.biomeEnabled;
-				button.setMessage(Text.literal("Biome: " + (config.biomeEnabled ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Biome: " + (config.biomeEnabled ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget biomeEnabledReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button biomeEnabledReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.biomeEnabled = false;
-				biomeEnabledBtn.setMessage(Text.literal("Biome: OFF"));
+				biomeEnabledBtn.setMessage(Component.literal("Biome: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(biomeEnabledBtn, biomeEnabledReset,
 			"Show current biome name on screen. (Default: OFF)", rowIndex++));
 		
 		// Biome Text Color
-		TextFieldWidget biomeColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		biomeColorField.setText(config.biomeTextColor);
+		EditBox biomeColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		biomeColorField.setValue(config.biomeTextColor);
 		biomeColorField.setMaxLength(7);
 		
-		ButtonWidget biomeColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button biomeColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.biomeTextColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.biomeTextColor, color -> {
 					config.biomeTextColor = color;
-					biomeColorField.setText(color);
+					biomeColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget biomeColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button biomeColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.biomeTextColor = "#FFFFFF";
-				biomeColorField.setText("#FFFFFF");
+				biomeColorField.setValue("#FFFFFF");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(biomeColorField, biomeColorPick, biomeColorReset,
 			"Biome text color. (Default: #FFFFFF)", rowIndex++));
 		
 		// Biome Background toggle
-		ButtonWidget biomeBgBtn = ButtonWidget.builder(
-			Text.literal("Biome BG: " + (config.biomeShowBackground ? "ON" : "OFF")),
+		Button biomeBgBtn = Button.builder(
+			Component.literal("Biome BG: " + (config.biomeShowBackground ? "ON" : "OFF")),
 			button -> {
 				config.biomeShowBackground = !config.biomeShowBackground;
-				button.setMessage(Text.literal("Biome BG: " + (config.biomeShowBackground ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Biome BG: " + (config.biomeShowBackground ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget biomeBgReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button biomeBgReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.biomeShowBackground = true;
-				biomeBgBtn.setMessage(Text.literal("Biome BG: ON"));
+				biomeBgBtn.setMessage(Component.literal("Biome BG: ON"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(biomeBgBtn, biomeBgReset,
 			"Show background behind biome. (Default: ON)", rowIndex++));
 		
 		// Biome Background Color
-		TextFieldWidget biomeBgColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		biomeBgColorField.setText(config.biomeBackgroundColor);
+		EditBox biomeBgColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		biomeBgColorField.setValue(config.biomeBackgroundColor);
 		biomeBgColorField.setMaxLength(7);
 		
-		ButtonWidget biomeBgColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button biomeBgColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.biomeBackgroundColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.biomeBackgroundColor, color -> {
 					config.biomeBackgroundColor = color;
-					biomeBgColorField.setText(color);
+					biomeBgColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget biomeBgColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button biomeBgColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.biomeBackgroundColor = "#000000";
-				biomeBgColorField.setText("#000000");
+				biomeBgColorField.setValue("#000000");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(biomeBgColorField, biomeBgColorPick, biomeBgColorReset,
 			"Biome background color. (Default: #000000)", rowIndex++));
 		
 		// Biome Text Size slider
 		FloatSlider biomeSizeSlider = new FloatSlider(widgetX, 0, WIDGET_WIDTH, 20, "Biome Size", 0.5f, 2.0f, config.biomeTextSize, "x");
-		ButtonWidget biomeSizeReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button biomeSizeReset = Button.builder(
+			Component.literal("Reset"),
 			button -> biomeSizeSlider.setValue(1.0f)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(biomeSizeSlider, biomeSizeReset,
 			"Biome text size. (Default: 1.0x)", rowIndex++));
 		
 		// Biome Text Opacity slider
 		IntSlider biomeOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Biome Opacity", 0, 100, config.biomeTextOpacity, "%");
-		ButtonWidget biomeOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button biomeOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> biomeOpacitySlider.setValue(100, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(biomeOpacitySlider, biomeOpacityReset,
 			"Biome text opacity. (Default: 100%)", rowIndex++));
 		
 		// Biome Background Opacity slider
 		IntSlider biomeBgOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Biome BG Op", 0, 100, config.biomeBackgroundOpacity, "%");
-		ButtonWidget biomeBgOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button biomeBgOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> biomeBgOpacitySlider.setValue(50, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(biomeBgOpacitySlider, biomeBgOpacityReset,
 			"Biome background opacity. (Default: 50%)", rowIndex++));
 		
 		// === TIME CLOCK SECTION ===
-		configRows.add(new ConfigRow("§e§l[ Time Clock ]", rowIndex++, true));
+		configRows.add(new ConfigRow("ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§eÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§l[ Time Clock ]", rowIndex++, true));
 		
 		// Time Clock Enabled toggle
-		ButtonWidget timeClockEnabledBtn = ButtonWidget.builder(
-			Text.literal("Time Clock: " + (config.timeClockEnabled ? "ON" : "OFF")),
+		Button timeClockEnabledBtn = Button.builder(
+			Component.literal("Time Clock: " + (config.timeClockEnabled ? "ON" : "OFF")),
 			button -> {
 				config.timeClockEnabled = !config.timeClockEnabled;
-				button.setMessage(Text.literal("Time Clock: " + (config.timeClockEnabled ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Time Clock: " + (config.timeClockEnabled ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget timeClockEnabledReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockEnabledReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.timeClockEnabled = false;
-				timeClockEnabledBtn.setMessage(Text.literal("Time Clock: OFF"));
+				timeClockEnabledBtn.setMessage(Component.literal("Time Clock: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockEnabledBtn, timeClockEnabledReset,
 			"Show Minecraft day and time on screen. (Default: OFF)", rowIndex++));
 		
 		// 24-Hour Format toggle
-		ButtonWidget timeClock24HourBtn = ButtonWidget.builder(
-			Text.literal("24-Hour: " + (config.timeClock24Hour ? "ON" : "OFF")),
+		Button timeClock24HourBtn = Button.builder(
+			Component.literal("24-Hour: " + (config.timeClock24Hour ? "ON" : "OFF")),
 			button -> {
 				config.timeClock24Hour = !config.timeClock24Hour;
-				button.setMessage(Text.literal("24-Hour: " + (config.timeClock24Hour ? "ON" : "OFF")));
+				button.setMessage(Component.literal("24-Hour: " + (config.timeClock24Hour ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget timeClock24HourReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClock24HourReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.timeClock24Hour = false;
-				timeClock24HourBtn.setMessage(Text.literal("24-Hour: OFF"));
+				timeClock24HourBtn.setMessage(Component.literal("24-Hour: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClock24HourBtn, timeClock24HourReset,
 			"Use 24-hour format instead of 12-hour. (Default: OFF)", rowIndex++));
 		
 		// Minimalist toggle
-		ButtonWidget timeClockMinimalistBtn = ButtonWidget.builder(
-			Text.literal("Minimalist: " + (config.timeClockMinimalist ? "ON" : "OFF")),
+		Button timeClockMinimalistBtn = Button.builder(
+			Component.literal("Minimalist: " + (config.timeClockMinimalist ? "ON" : "OFF")),
 			button -> {
 				config.timeClockMinimalist = !config.timeClockMinimalist;
-				button.setMessage(Text.literal("Minimalist: " + (config.timeClockMinimalist ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Minimalist: " + (config.timeClockMinimalist ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget timeClockMinimalistReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockMinimalistReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.timeClockMinimalist = false;
-				timeClockMinimalistBtn.setMessage(Text.literal("Minimalist: OFF"));
+				timeClockMinimalistBtn.setMessage(Component.literal("Minimalist: OFF"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockMinimalistBtn, timeClockMinimalistReset,
 			"Use minimalist format without labels. (Default: OFF)", rowIndex++));
 		
 		// Time Clock Text Color
-		TextFieldWidget timeClockColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		timeClockColorField.setText(config.timeClockTextColor);
+		EditBox timeClockColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		timeClockColorField.setValue(config.timeClockTextColor);
 		timeClockColorField.setMaxLength(7);
 		
-		ButtonWidget timeClockColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button timeClockColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.timeClockTextColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.timeClockTextColor, color -> {
 					config.timeClockTextColor = color;
-					timeClockColorField.setText(color);
+					timeClockColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget timeClockColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.timeClockTextColor = "#FFFFFF";
-				timeClockColorField.setText("#FFFFFF");
+				timeClockColorField.setValue("#FFFFFF");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockColorField, timeClockColorPick, timeClockColorReset,
 			"Time clock text color. (Default: #FFFFFF)", rowIndex++));
 		
 		// Time Clock Background toggle
-		ButtonWidget timeClockBgBtn = ButtonWidget.builder(
-			Text.literal("Clock BG: " + (config.timeClockShowBackground ? "ON" : "OFF")),
+		Button timeClockBgBtn = Button.builder(
+			Component.literal("Clock BG: " + (config.timeClockShowBackground ? "ON" : "OFF")),
 			button -> {
 				config.timeClockShowBackground = !config.timeClockShowBackground;
-				button.setMessage(Text.literal("Clock BG: " + (config.timeClockShowBackground ? "ON" : "OFF")));
+				button.setMessage(Component.literal("Clock BG: " + (config.timeClockShowBackground ? "ON" : "OFF")));
 			}
-		).dimensions(widgetX, 0, WIDGET_WIDTH, 20).build();
+		).bounds(widgetX, 0, WIDGET_WIDTH, 20).build();
 		
-		ButtonWidget timeClockBgReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockBgReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.timeClockShowBackground = true;
-				timeClockBgBtn.setMessage(Text.literal("Clock BG: ON"));
+				timeClockBgBtn.setMessage(Component.literal("Clock BG: ON"));
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockBgBtn, timeClockBgReset,
 			"Show background behind time clock. (Default: ON)", rowIndex++));
 		
 		// Time Clock Background Color
-		TextFieldWidget timeClockBgColorField = new TextFieldWidget(textRenderer, widgetX, 0, WIDGET_WIDTH - 55, 20, Text.literal(""));
-		timeClockBgColorField.setText(config.timeClockBackgroundColor);
+		EditBox timeClockBgColorField = new EditBox(font, widgetX, 0, WIDGET_WIDTH - 55, 20, Component.literal(""));
+		timeClockBgColorField.setValue(config.timeClockBackgroundColor);
 		timeClockBgColorField.setMaxLength(7);
 		
-		ButtonWidget timeClockBgColorPick = ButtonWidget.builder(
-			Text.literal("Pick"),
+		Button timeClockBgColorPick = Button.builder(
+			Component.literal("Pick"),
 			button -> {
-				client.setScreen(new ColorPickerScreen(this, config.timeClockBackgroundColor, color -> {
+				minecraft.setScreen(new ColorPickerScreen(this, config.timeClockBackgroundColor, color -> {
 					config.timeClockBackgroundColor = color;
-					timeClockBgColorField.setText(color);
+					timeClockBgColorField.setValue(color);
 				}));
 			}
-		).dimensions(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
+		).bounds(widgetX + WIDGET_WIDTH - 50, 0, 50, 20).build();
 		
-		ButtonWidget timeClockBgColorReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockBgColorReset = Button.builder(
+			Component.literal("Reset"),
 			button -> {
 				config.timeClockBackgroundColor = "#000000";
-				timeClockBgColorField.setText("#000000");
+				timeClockBgColorField.setValue("#000000");
 			}
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockBgColorField, timeClockBgColorPick, timeClockBgColorReset,
 			"Time clock background color. (Default: #000000)", rowIndex++));
 		
 		// Time Clock Text Size slider
 		FloatSlider timeClockSizeSlider = new FloatSlider(widgetX, 0, WIDGET_WIDTH, 20, "Clock Size", 0.5f, 2.0f, config.timeClockTextSize, "x");
-		ButtonWidget timeClockSizeReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockSizeReset = Button.builder(
+			Component.literal("Reset"),
 			button -> timeClockSizeSlider.setValue(1.0f)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockSizeSlider, timeClockSizeReset,
 			"Time clock text size. (Default: 1.0x)", rowIndex++));
 		
 		// Time Clock Text Opacity slider
 		IntSlider timeClockOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Clock Opacity", 0, 100, config.timeClockTextOpacity, "%");
-		ButtonWidget timeClockOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> timeClockOpacitySlider.setValue(100, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockOpacitySlider, timeClockOpacityReset,
 			"Time clock text opacity. (Default: 100%)", rowIndex++));
 		
 		// Time Clock Background Opacity slider
 		IntSlider timeClockBgOpacitySlider = new IntSlider(widgetX, 0, WIDGET_WIDTH, 20, "Clock BG Op", 0, 100, config.timeClockBackgroundOpacity, "%");
-		ButtonWidget timeClockBgOpacityReset = ButtonWidget.builder(
-			Text.literal("Reset"),
+		Button timeClockBgOpacityReset = Button.builder(
+			Component.literal("Reset"),
 			button -> timeClockBgOpacitySlider.setValue(50, 0, 100)
-		).dimensions(resetX, 0, RESET_BTN_WIDTH, 20).build();
+		).bounds(resetX, 0, RESET_BTN_WIDTH, 20).build();
 		
 		configRows.add(new ConfigRow(timeClockBgOpacitySlider, timeClockBgOpacityReset,
 			"Time clock background opacity. (Default: 50%)", rowIndex++));
@@ -841,27 +845,27 @@ public class SimpleFPSConfigScreen extends Screen {
 		int buttonStartX = centerX - totalButtonsWidth / 2;
 		
 		// Save & Close button (leftmost)
-		addDrawableChild(ButtonWidget.builder(
-			Text.literal("Save & Close"),
+		addRenderableWidget(Button.builder(
+			Component.literal("Save & Close"),
 			button -> {
 				saveSettings();
-				close();
+				onClose();
 			}
-		).dimensions(buttonStartX, bottomY, bottomButtonWidth, 20).build());
+		).bounds(buttonStartX, bottomY, bottomButtonWidth, 20).build());
 		
 		// Key Binds shortcut button (middle)
-		addDrawableChild(ButtonWidget.builder(
-			Text.literal("Key Binds"),
+		addRenderableWidget(Button.builder(
+			Component.literal("Key Binds"),
 			button -> {
-				client.setScreen(new KeybindsScreen(this, client.options));
+				minecraft.setScreen(new KeyBindsScreen(this, minecraft.options));
 			}
-		).dimensions(buttonStartX + bottomButtonWidth + buttonGap, bottomY, bottomButtonWidth, 20).build());
+		).bounds(buttonStartX + bottomButtonWidth + buttonGap, bottomY, bottomButtonWidth, 20).build());
 		
 		// Cancel button (rightmost)
-		addDrawableChild(ButtonWidget.builder(
-			Text.literal("Cancel"),
-			button -> close()
-		).dimensions(buttonStartX + (bottomButtonWidth + buttonGap) * 2, bottomY, bottomButtonWidth, 20).build());
+		addRenderableWidget(Button.builder(
+			Component.literal("Cancel"),
+			button -> onClose()
+		).bounds(buttonStartX + (bottomButtonWidth + buttonGap) * 2, bottomY, bottomButtonWidth, 20).build());
 	}
 	
 	private void saveSettings() {
@@ -875,8 +879,13 @@ public class SimpleFPSConfigScreen extends Screen {
 	}
 	
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	//? if >=26.1 {
+	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+		super.extractRenderState(context, mouseX, mouseY, delta);
+	//?} else {
+	/*public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		super.render(context, mouseX, mouseY, delta);
+	*///?}
 		
 		int visibleTop = HEADER_HEIGHT;
 		int visibleBottom = this.height - FOOTER_HEIGHT;
@@ -908,8 +917,13 @@ public class SimpleFPSConfigScreen extends Screen {
 			// Render section headers
 			if (row.isSectionHeader) {
 				if (rowY + ROW_HEIGHT >= visibleTop && rowY < visibleBottom) {
-					context.drawCenteredTextWithShadow(textRenderer, Text.literal(row.headerText), 
+				//? if >=26.1 {
+				context.centeredText(font, Component.literal(row.headerText), 
 						this.width / 2, rowY + 6, 0xFFFF55);
+				//?} else {
+					/*context.drawCenteredString(font, Component.literal(row.headerText), 
+						this.width / 2, rowY + 6, 0xFFFF55);
+				*///?}
 				}
 			}
 		}
@@ -917,11 +931,19 @@ public class SimpleFPSConfigScreen extends Screen {
 		context.disableScissor();
 		
 		// Render title (above scissor area)
-		context.drawCenteredTextWithShadow(textRenderer, this.title, this.width / 2, 8, 0xFFFFFF);
+		//? if >=26.1 {
+		context.centeredText(font, this.title, this.width / 2, 8, 0xFFFFFF);
+		//?} else {
+		/*context.drawCenteredString(font, this.title, this.width / 2, 8, 0xFFFFFF);
+		*///?}
 		
 		// Render footer note
-		String footerNote = "§7Using fallback config (install Cloth Config for full experience)";
-		context.drawCenteredTextWithShadow(textRenderer, Text.literal(footerNote), this.width / 2, this.height - 48, 0x888888);
+		String footerNote = "ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§7Using fallback config (install Cloth Config for full experience)";
+		//? if >=26.1 {
+		context.centeredText(font, Component.literal(footerNote), this.width / 2, this.height - 48, 0x888888);
+		//?} else {
+		/*context.drawCenteredString(font, Component.literal(footerNote), this.width / 2, this.height - 48, 0x888888);
+		*///?}
 		
 		// Render scroll indicator if needed
 		if (maxScrollOffset > 0) {
@@ -933,7 +955,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		
 		// Render tooltip last (on top of everything)
 		if (hoveredTooltip != null && !hoveredTooltip.isEmpty()) {
-			context.drawTooltip(textRenderer, Text.literal(hoveredTooltip), mouseX, mouseY);
+			context.setTooltipForNextFrame(font, Component.literal(hoveredTooltip), mouseX, mouseY);
 		}
 	}
 	
@@ -947,7 +969,7 @@ public class SimpleFPSConfigScreen extends Screen {
 	}
 	
 	@Override
-	public boolean mouseClicked(Click click, boolean doubleClick) {
+	public boolean mouseClicked(MouseButtonEvent click, boolean doubleClick) {
 		double mouseX = click.x();
 		double mouseY = click.y();
 		int button = click.button();
@@ -986,7 +1008,7 @@ public class SimpleFPSConfigScreen extends Screen {
 	}
 	
 	@Override
-	public boolean mouseDragged(Click click, double deltaX, double deltaY) {
+	public boolean mouseDragged(MouseButtonEvent click, double deltaX, double deltaY) {
 		int button = click.button();
 		double mouseY = click.y();
 		
@@ -1007,7 +1029,7 @@ public class SimpleFPSConfigScreen extends Screen {
 	}
 	
 	@Override
-	public boolean mouseReleased(Click click) {
+	public boolean mouseReleased(MouseButtonEvent click) {
 		if (click.button() == 0) {
 			isDraggingScrollbar = false;
 		}
@@ -1015,8 +1037,8 @@ public class SimpleFPSConfigScreen extends Screen {
 	}
 	
 	@Override
-	public void close() {
-		client.setScreen(parent);
+	public void onClose() {
+		minecraft.setScreen(parent);
 	}
 	
 	// =====================================================================
@@ -1030,11 +1052,11 @@ public class SimpleFPSConfigScreen extends Screen {
 		final String tooltip;
 		
 		// For widget rows
-		ButtonWidget widget1;
-		ButtonWidget widget2;
-		ButtonWidget widget3;
-		TextFieldWidget textField;
-		SliderWidget slider;
+		Button widget1;
+		Button widget2;
+		Button widget3;
+		EditBox textField;
+		AbstractSliderButton slider;
 		
 		// Section header constructor
 		ConfigRow(String headerText, int rowIndex, boolean isSectionHeader) {
@@ -1045,7 +1067,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		}
 		
 		// Button + Reset constructor
-		ConfigRow(ButtonWidget button, ButtonWidget reset, String tooltip, int rowIndex) {
+		ConfigRow(Button button, Button reset, String tooltip, int rowIndex) {
 			this.widget1 = button;
 			this.widget2 = reset;
 			this.tooltip = tooltip;
@@ -1055,7 +1077,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		}
 		
 		// Slider + Reset constructor
-		ConfigRow(SliderWidget slider, ButtonWidget reset, String tooltip, int rowIndex) {
+		ConfigRow(AbstractSliderButton slider, Button reset, String tooltip, int rowIndex) {
 			this.slider = slider;
 			this.widget2 = reset;
 			this.tooltip = tooltip;
@@ -1065,7 +1087,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		}
 		
 		// TextField + Pick + Reset constructor
-		ConfigRow(TextFieldWidget textField, ButtonWidget pick, ButtonWidget reset, String tooltip, int rowIndex) {
+		ConfigRow(EditBox textField, Button pick, Button reset, String tooltip, int rowIndex) {
 			this.textField = textField;
 			this.widget1 = pick;
 			this.widget2 = reset;
@@ -1076,11 +1098,11 @@ public class SimpleFPSConfigScreen extends Screen {
 		}
 		
 		void addWidgetsToScreen() {
-			if (widget1 != null) addDrawableChild(widget1);
-			if (widget2 != null) addDrawableChild(widget2);
-			if (widget3 != null) addDrawableChild(widget3);
-			if (textField != null) addDrawableChild(textField);
-			if (slider != null) addDrawableChild(slider);
+			if (widget1 != null) addRenderableWidget(widget1);
+			if (widget2 != null) addRenderableWidget(widget2);
+			if (widget3 != null) addRenderableWidget(widget3);
+			if (textField != null) addRenderableWidget(textField);
+			if (slider != null) addRenderableWidget(slider);
 		}
 		
 		void updatePositions(int y) {
@@ -1122,15 +1144,15 @@ public class SimpleFPSConfigScreen extends Screen {
 		private boolean isHovered(Object widget, int mouseX, int mouseY) {
 			if (widget == null) return false;
 			
-			if (widget instanceof ButtonWidget btn) {
+			if (widget instanceof Button btn) {
 				return btn.visible && mouseX >= btn.getX() && mouseX < btn.getX() + btn.getWidth()
 					&& mouseY >= btn.getY() && mouseY < btn.getY() + btn.getHeight();
 			}
-			if (widget instanceof TextFieldWidget tf) {
+			if (widget instanceof EditBox tf) {
 				return tf.visible && mouseX >= tf.getX() && mouseX < tf.getX() + tf.getWidth()
 					&& mouseY >= tf.getY() && mouseY < tf.getY() + tf.getHeight();
 			}
-			if (widget instanceof SliderWidget sl) {
+			if (widget instanceof AbstractSliderButton sl) {
 				return sl.visible && mouseX >= sl.getX() && mouseX < sl.getX() + sl.getWidth()
 					&& mouseY >= sl.getY() && mouseY < sl.getY() + sl.getHeight();
 			}
@@ -1170,9 +1192,9 @@ public class SimpleFPSConfigScreen extends Screen {
 			if (textField != null) {
 				// Map text fields to config fields
 				if (textField == textColorField) {
-					config.textColor = textField.getText();
+					config.textColor = textField.getValue();
 				} else if (textField == bgColorField) {
-					config.backgroundColor = textField.getText();
+					config.backgroundColor = textField.getValue();
 				}
 			}
 		}
@@ -1185,14 +1207,14 @@ public class SimpleFPSConfigScreen extends Screen {
 	/**
 	 * Custom slider widget for integer values.
 	 */
-	private static class IntSlider extends SliderWidget {
+	private static class IntSlider extends AbstractSliderButton {
 		private final int min;
 		private final int max;
 		private final String suffix;
 		private final String label;
 		
 		public IntSlider(int x, int y, int width, int height, String label, int min, int max, int value, String suffix) {
-			super(x, y, width, height, Text.literal(label + ": " + value + suffix), (double)(value - min) / (max - min));
+			super(x, y, width, height, Component.literal(label + ": " + value + suffix), (double)(value - min) / (max - min));
 			this.min = min;
 			this.max = max;
 			this.suffix = suffix;
@@ -1214,7 +1236,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		
 		@Override
 		protected void updateMessage() {
-			setMessage(Text.literal(label + ": " + getIntValue() + suffix));
+			setMessage(Component.literal(label + ": " + getIntValue() + suffix));
 		}
 		
 		@Override
@@ -1226,14 +1248,14 @@ public class SimpleFPSConfigScreen extends Screen {
 	/**
 	 * Custom slider widget for float values.
 	 */
-	private static class FloatSlider extends SliderWidget {
+	private static class FloatSlider extends AbstractSliderButton {
 		private final float min;
 		private final float max;
 		private final String suffix;
 		private final String label;
 		
 		public FloatSlider(int x, int y, int width, int height, String label, float min, float max, float value, String suffix) {
-			super(x, y, width, height, Text.literal(label + ": " + String.format("%.1f", value) + suffix), (double)(value - min) / (max - min));
+			super(x, y, width, height, Component.literal(label + ": " + String.format("%.1f", value) + suffix), (double)(value - min) / (max - min));
 			this.min = min;
 			this.max = max;
 			this.suffix = suffix;
@@ -1255,7 +1277,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		
 		@Override
 		protected void updateMessage() {
-			setMessage(Text.literal(label + ": " + String.format("%.1f", getFloatValue()) + suffix));
+			setMessage(Component.literal(label + ": " + String.format("%.1f", getFloatValue()) + suffix));
 		}
 		
 		@Override

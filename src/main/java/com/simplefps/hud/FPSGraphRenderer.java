@@ -1,8 +1,12 @@
 package com.simplefps.hud;
 
 import com.simplefps.config.SimpleFPSConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.Minecraft;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
 
 import java.util.LinkedList;
 
@@ -30,7 +34,7 @@ public class FPSGraphRenderer {
 		
 		// Sample FPS at intervals
 		if (currentTime - lastSampleTime >= SAMPLE_INTERVAL) {
-			int currentFps = MinecraftClient.getInstance().getCurrentFps();
+			int currentFps = Minecraft.getInstance().getFps();
 			
 			fpsHistory.addLast(currentFps);
 			if (fpsHistory.size() > MAX_SAMPLES) {
@@ -54,14 +58,18 @@ public class FPSGraphRenderer {
 		}
 	}
 	
-	public static void renderGraph(DrawContext context, boolean isPreview) {
+	//? if >=26.1 {
+	public static void renderGraph(GuiGraphicsExtractor context, boolean isPreview) {
+	//?} else {
+	/*public static void renderGraph(GuiGraphics context, boolean isPreview) {
+	*///?}
 		SimpleFPSConfig config = SimpleFPSConfig.getInstance();
 		
 		if (!config.graphEnabled && !isPreview) {
 			return;
 		}
 		
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		if (client.player == null && !isPreview) {
 			return;
 		}
@@ -79,8 +87,8 @@ public class FPSGraphRenderer {
 		int totalHeight = height + textHeight;
 		
 		// Get scaled positions
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
+		int screenWidth = client.getWindow().getGuiScaledWidth();
+		int screenHeight = client.getWindow().getGuiScaledHeight();
 		
 		int x = config.getScaledGraphX(screenWidth);
 		int y = config.getScaledGraphY(screenHeight);
@@ -102,7 +110,11 @@ public class FPSGraphRenderer {
 		
 		// Draw graph title
 		String title = "FPS Graph";
-		context.drawTextWithShadow(client.textRenderer, title, x + 3, y + 2, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(client.font, title, x + 3, y + 2, 0xFFFFFF);
+		//?} else {
+		/*context.drawString(client.font, title, x + 3, y + 2, 0xFFFFFF);
+		*///?}
 		
 		// Draw horizontal line separator (only if background enabled)
 		if (config.graphShowBackground) {
@@ -155,7 +167,7 @@ public class FPSGraphRenderer {
 		int statsY = y + height + 1;
 		int labelY = statsY;
 		int valueY = statsY + 11;
-		int currentFps = client.getCurrentFps();
+		int currentFps = client.getFps();
 		
 		int displayMin = minFps == Integer.MAX_VALUE ? currentFps : minFps;
 		int displayMax = maxFps == 0 ? currentFps : maxFps;
@@ -178,17 +190,33 @@ public class FPSGraphRenderer {
 		int col3X = x + padding + colWidth * 2;
 		
 		// Row 1: Labels (Min: / Max: / Avg:) in gray
-		context.drawTextWithShadow(client.textRenderer, "Min:", col1X, labelY, 0xFFAAAAAA);
-		context.drawTextWithShadow(client.textRenderer, "Max:", col2X, labelY, 0xFFAAAAAA);
-		context.drawTextWithShadow(client.textRenderer, "Avg:", col3X, labelY, 0xFFAAAAAA);
+		//? if >=26.1 {
+		context.text(client.font, "Min:", col1X, labelY, 0xFFAAAAAA);
+		context.text(client.font, "Max:", col2X, labelY, 0xFFAAAAAA);
+		context.text(client.font, "Avg:", col3X, labelY, 0xFFAAAAAA);
+		//?} else {
+		/*context.drawString(client.font, "Min:", col1X, labelY, 0xFFAAAAAA);
+		context.drawString(client.font, "Max:", col2X, labelY, 0xFFAAAAAA);
+		context.drawString(client.font, "Avg:", col3X, labelY, 0xFFAAAAAA);
+		*///?}
 		
 		// Row 2: Values (colored based on thresholds)
-		context.drawTextWithShadow(client.textRenderer, String.valueOf(displayMin), col1X, valueY, minColor);
-		context.drawTextWithShadow(client.textRenderer, String.valueOf(displayMax), col2X, valueY, maxColor);
-		context.drawTextWithShadow(client.textRenderer, String.valueOf(displayAvg), col3X, valueY, avgColor);
+		//? if >=26.1 {
+		context.text(client.font, String.valueOf(displayMin), col1X, valueY, minColor);
+		context.text(client.font, String.valueOf(displayMax), col2X, valueY, maxColor);
+		context.text(client.font, String.valueOf(displayAvg), col3X, valueY, avgColor);
+		//?} else {
+		/*context.drawString(client.font, String.valueOf(displayMin), col1X, valueY, minColor);
+		context.drawString(client.font, String.valueOf(displayMax), col2X, valueY, maxColor);
+		context.drawString(client.font, String.valueOf(displayAvg), col3X, valueY, avgColor);
+		*///?}
 	}
 	
-	private static void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {
+	//? if >=26.1 {
+	private static void drawBorder(GuiGraphicsExtractor context, int x, int y, int width, int height, int color) {
+	//?} else {
+	/*private static void drawBorder(GuiGraphics context, int x, int y, int width, int height, int color) {
+	*///?}
 		context.fill(x, y, x + width, y + 1, color); // Top
 		context.fill(x, y + height - 1, x + width, y + height, color); // Bottom
 		context.fill(x, y, x + 1, y + height, color); // Left
@@ -196,15 +224,15 @@ public class FPSGraphRenderer {
 	}
 	
 	public static int getMinFps() {
-		return minFps == Integer.MAX_VALUE ? MinecraftClient.getInstance().getCurrentFps() : minFps;
+		return minFps == Integer.MAX_VALUE ? Minecraft.getInstance().getFps() : minFps;
 	}
 	
 	public static int getMaxFps() {
-		return maxFps == 0 ? MinecraftClient.getInstance().getCurrentFps() : maxFps;
+		return maxFps == 0 ? Minecraft.getInstance().getFps() : maxFps;
 	}
 	
 	public static int getAvgFps() {
-		return avgFps == 0 ? MinecraftClient.getInstance().getCurrentFps() : avgFps;
+		return avgFps == 0 ? Minecraft.getInstance().getFps() : avgFps;
 	}
 	
 	public static void resetStats() {

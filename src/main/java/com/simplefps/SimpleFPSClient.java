@@ -9,10 +9,22 @@ import com.simplefps.hud.BiomeRenderer;
 import com.simplefps.hud.TimeClockRenderer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+//? if >=26.1 {
+import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElement;
+import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.util.Identifier;
+*///?}
+import net.minecraft.client.KeyMapping;
+//? if >=1.21.11 {
+import net.minecraft.resources.Identifier;
+//?} else {
+/*import net.minecraft.resources.ResourceLocation;*/
+//?}
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +34,16 @@ public class SimpleFPSClient implements ClientModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger("SimpleFPS");
 	
 	// Define a custom category for our keybindings
-	private static final KeyBinding.Category SIMPLEFPS_CATEGORY = new KeyBinding.Category(Identifier.of(MOD_ID, "category"));
+	//? if >=1.21.11 {
+	private static final KeyMapping.Category SIMPLEFPS_CATEGORY = new KeyMapping.Category(Identifier.fromNamespaceAndPath(MOD_ID, "category"));
+	//?} else {
+	/*private static final KeyMapping.Category SIMPLEFPS_CATEGORY = new KeyMapping.Category(ResourceLocation.fromNamespaceAndPath(MOD_ID, "category"));*/
+	//?}
 	
-	public static KeyBinding toggleKeyBinding;
-	public static KeyBinding configKeyBinding;
-	public static KeyBinding dragKeyBinding;
-	public static KeyBinding reloadKeyBinding;
+	public static KeyMapping toggleKeyBinding;
+	public static KeyMapping configKeyBinding;
+	public static KeyMapping dragKeyBinding;
+	public static KeyMapping reloadKeyBinding;
 	
 	@Override
 	public void onInitializeClient() {
@@ -37,50 +53,86 @@ public class SimpleFPSClient implements ClientModInitializer {
 		SimpleFPSConfig.load();
 		
 		// Register HUD renderers
-		HudRenderCallback.EVENT.register((context, tickCounter) -> {
+		//? if >=26.1 {
+		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(MOD_ID, "hud"), (context, tickCounter) -> {
 			FPSHudRenderer.render(context, tickCounter);
 			FPSGraphRenderer.renderGraph(context, false);
 			CoordinatesRenderer.render(context, false);
 			BiomeRenderer.render(context, false);
 			TimeClockRenderer.render(context, false);
 		});
+		//?} else {
+		/*HudRenderCallback.EVENT.register((context, tickCounter) -> {
+			FPSHudRenderer.render(context, tickCounter);
+			FPSGraphRenderer.renderGraph(context, false);
+			CoordinatesRenderer.render(context, false);
+			BiomeRenderer.render(context, false);
+			TimeClockRenderer.render(context, false);
+		});
+		*///?}
 		
 		// Register keybindings (all unbound by default)
-		toggleKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		//? if >=26.1 {
+		toggleKeyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"key.simplefps.toggle",
 			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
 		
-		configKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		configKeyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"key.simplefps.config",
 			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
 		
-		dragKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		dragKeyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"key.simplefps.drag",
 			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
 		
-		reloadKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+		reloadKeyBinding = KeyMappingHelper.registerKeyMapping(new KeyMapping(
 			"key.simplefps.reload",
 			GLFW.GLFW_KEY_UNKNOWN,
 			SIMPLEFPS_CATEGORY
 		));
+		//?} else {
+		/*toggleKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+			"key.simplefps.toggle",
+			GLFW.GLFW_KEY_UNKNOWN,
+			SIMPLEFPS_CATEGORY
+		));
+		
+		configKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+			"key.simplefps.config",
+			GLFW.GLFW_KEY_UNKNOWN,
+			SIMPLEFPS_CATEGORY
+		));
+		
+		dragKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+			"key.simplefps.drag",
+			GLFW.GLFW_KEY_UNKNOWN,
+			SIMPLEFPS_CATEGORY
+		));
+		
+		reloadKeyBinding = KeyBindingHelper.registerKeyBinding(new KeyMapping(
+			"key.simplefps.reload",
+			GLFW.GLFW_KEY_UNKNOWN,
+			SIMPLEFPS_CATEGORY
+		));
+		*///?}
 		
 		// Register tick event for keybinding handling
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
-			while (toggleKeyBinding.wasPressed()) {
+			while (toggleKeyBinding.consumeClick()) {
 				SimpleFPSConfig config = SimpleFPSConfig.getInstance();
 				config.enabled = !config.enabled;
 				config.save();
 				LOGGER.info("FPS Counter toggled: {}", config.enabled);
 			}
 			
-			while (configKeyBinding.wasPressed()) {
-				if (client.currentScreen == null) {
+			while (configKeyBinding.consumeClick()) {
+				if (client.screen == null) {
 					try {
 						Class.forName("me.shedaniel.clothconfig2.api.ConfigBuilder");
 						client.setScreen(com.simplefps.config.ModConfigScreen.createConfigScreen(null));
@@ -90,13 +142,13 @@ public class SimpleFPSClient implements ClientModInitializer {
 				}
 			}
 			
-			while (dragKeyBinding.wasPressed()) {
-				if (client.currentScreen == null) {
+			while (dragKeyBinding.consumeClick()) {
+				if (client.screen == null) {
 					client.setScreen(new HudDragScreen(null));
 				}
 			}
 			
-			while (reloadKeyBinding.wasPressed()) {
+			while (reloadKeyBinding.consumeClick()) {
 				SimpleFPSConfig.reload();
 				LOGGER.info("SimpleFPS config reloaded from file");
 			}

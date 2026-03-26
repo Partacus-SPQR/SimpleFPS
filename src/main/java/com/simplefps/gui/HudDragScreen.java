@@ -6,10 +6,14 @@ import com.simplefps.hud.FPSGraphRenderer;
 import com.simplefps.hud.CoordinatesRenderer;
 import com.simplefps.hud.BiomeRenderer;
 import com.simplefps.hud.TimeClockRenderer;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -30,17 +34,21 @@ public class HudDragScreen extends Screen {
 	private boolean wasMouseDown = false;
 	
 	public HudDragScreen(Screen parent) {
-		super(Text.literal("Drag HUD Elements"));
+		super(Component.literal("Drag HUD Elements"));
 		this.parent = parent;
 		this.config = SimpleFPSConfig.getInstance();
 	}
 	
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		MinecraftClient client = MinecraftClient.getInstance();
+	//? if >=26.1 {
+	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+	//?} else {
+	/*public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
+	*///?}
+		Minecraft client = Minecraft.getInstance();
 		
 		// Handle mouse input using GLFW
-		long windowHandle = client.getWindow().getHandle();
+		long windowHandle = client.getWindow().handle();
 		boolean isMouseDown = GLFW.glfwGetMouseButton(windowHandle, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		
 		// Detect mouse click start
@@ -65,7 +73,11 @@ public class HudDragScreen extends Screen {
 		
 		// Draw instructions at top
 		String instruction = "Click and drag any element to reposition. Press ESC to save.";
-		context.drawCenteredTextWithShadow(this.textRenderer, instruction, this.width / 2, 10, 0xFFFFFF);
+		//? if >=26.1 {
+		context.centeredText(this.font, instruction, this.width / 2, 10, 0xFFFFFF);
+		//?} else {
+		/*context.drawCenteredString(this.font, instruction, this.width / 2, 10, 0xFFFFFF);
+		*///?}
 		
 		// Render all HUD elements with their drag indicators
 		
@@ -108,18 +120,30 @@ public class HudDragScreen extends Screen {
 		}
 		
 		// Draw hint at bottom
-		String hint = "§7Enabled elements: ";
+		String hint = "\u00a77Enabled elements: ";
 		if (config.enabled) hint += "FPS ";
 		if (config.graphEnabled) hint += "Graph ";
 		if (config.coordinatesEnabled) hint += "Coords ";
 		if (config.biomeEnabled) hint += "Biome ";
 		if (config.timeClockEnabled) hint += "Clock ";
-		context.drawCenteredTextWithShadow(this.textRenderer, Text.literal(hint), this.width / 2, this.height - 30, 0xAAAAAA);
+		//? if >=26.1 {
+		context.centeredText(this.font, Component.literal(hint), this.width / 2, this.height - 30, 0xAAAAAA);
+		//?} else {
+		/*context.drawCenteredString(this.font, Component.literal(hint), this.width / 2, this.height - 30, 0xAAAAAA);
+		*///?}
 		
-		super.render(context, mouseX, mouseY, delta);
+		//? if >=26.1 {
+		super.extractRenderState(context, mouseX, mouseY, delta);
+		//?} else {
+		/*super.render(context, mouseX, mouseY, delta);
+		*///?}
 	}
 	
-	private void drawElementBorder(DrawContext context, int x, int y, int width, int height, boolean isDragging, String label) {
+	//? if >=26.1 {
+	private void drawElementBorder(GuiGraphicsExtractor context, int x, int y, int width, int height, boolean isDragging, String label) {
+	//?} else {
+	/*private void drawElementBorder(GuiGraphics context, int x, int y, int width, int height, boolean isDragging, String label) {
+	*///?}
 		int color = isDragging ? 0xFFFFFF00 : 0xFF00FF00; // Yellow when dragging, green otherwise
 		int padding = 2;
 		
@@ -131,10 +155,14 @@ public class HudDragScreen extends Screen {
 		
 		// Draw small label to the right - only show element type, not "Drag me"
 		int labelColor = isDragging ? 0xFFFFFF00 : 0xFF55FF55;
-		context.drawTextWithShadow(this.textRenderer, "← " + label, x + width + 6, y + (height / 2) - 4, labelColor);
+		//? if >=26.1 {
+		context.text(this.font, "\u2190 " + label, x + width + 6, y + (height / 2) - 4, labelColor);
+		//?} else {
+		/*context.drawString(this.font, "\u2190 " + label, x + width + 6, y + (height / 2) - 4, labelColor);
+		*///?}
 	}
 	
-	private void handleMouseClick(int mouseX, int mouseY, MinecraftClient client) {
+	private void handleMouseClick(int mouseX, int mouseY, Minecraft client) {
 		// Check each element in reverse order (top elements first)
 		
 		// Check Biome
@@ -205,9 +233,9 @@ public class HudDragScreen extends Screen {
 			   mouseY >= y - padding && mouseY <= y + height + padding;
 	}
 	
-	private void handleMouseDrag(int mouseX, int mouseY, MinecraftClient client) {
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
+	private void handleMouseDrag(int mouseX, int mouseY, Minecraft client) {
+		int screenWidth = minecraft.getWindow().getGuiScaledWidth();
+		int screenHeight = minecraft.getWindow().getGuiScaledHeight();
 		
 		switch (currentDrag) {
 			case FPS -> {
@@ -248,10 +276,10 @@ public class HudDragScreen extends Screen {
 	private void handleMouseRelease() {
 		if (currentDrag != DragTarget.NONE) {
 			// Save reference resolution so positions scale correctly when window is resized
-			MinecraftClient client = MinecraftClient.getInstance();
+			Minecraft client = Minecraft.getInstance();
 			config.updateReferenceResolution(
-				client.getWindow().getScaledWidth(),
-				client.getWindow().getScaledHeight()
+				client.getWindow().getGuiScaledWidth(),
+				client.getWindow().getGuiScaledHeight()
 			);
 			currentDrag = DragTarget.NONE;
 			config.save();
@@ -263,61 +291,61 @@ public class HudDragScreen extends Screen {
 	}
 	
 	private int getFpsWidth() {
-		MinecraftClient client = MinecraftClient.getInstance();
-		int fps = client.getCurrentFps();
+		Minecraft client = Minecraft.getInstance();
+		int fps = client.getFps();
 		String text = config.showLabel ? fps + " FPS" : String.valueOf(fps);
 		if (config.showDirection && client.player != null) {
 			text += " N"; // Approximate width
 		}
-		return (int) (client.textRenderer.getWidth(text) * config.textSize);
+		return (int) (client.font.width(text) * config.textSize);
 	}
 	
 	private int getFpsHeight() {
-		MinecraftClient client = MinecraftClient.getInstance();
-		return (int) (client.textRenderer.fontHeight * config.textSize);
+		Minecraft client = Minecraft.getInstance();
+		return (int) (client.font.lineHeight * config.textSize);
 	}
 	
 	private int getCoordinatesWidth() {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		String text = "X: 0000 Y: 000 Z: 0000";
-		return (int) (client.textRenderer.getWidth(text) * config.coordinatesTextSize);
+		return (int) (client.font.width(text) * config.coordinatesTextSize);
 	}
 	
 	private int getCoordinatesHeight() {
-		MinecraftClient client = MinecraftClient.getInstance();
-		return (int) (client.textRenderer.fontHeight * config.coordinatesTextSize);
+		Minecraft client = Minecraft.getInstance();
+		return (int) (client.font.lineHeight * config.coordinatesTextSize);
 	}
 	
 	private int getBiomeWidth() {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		String text = "Sample Biome Name";
-		return (int) (client.textRenderer.getWidth(text) * config.biomeTextSize);
+		return (int) (client.font.width(text) * config.biomeTextSize);
 	}
 	
 	private int getBiomeHeight() {
-		MinecraftClient client = MinecraftClient.getInstance();
-		return (int) (client.textRenderer.fontHeight * config.biomeTextSize);
+		Minecraft client = Minecraft.getInstance();
+		return (int) (client.font.lineHeight * config.biomeTextSize);
 	}
 	
 	private int getTimeClockWidth() {
-		MinecraftClient client = MinecraftClient.getInstance();
+		Minecraft client = Minecraft.getInstance();
 		String text = TimeClockRenderer.getSampleText(config);
-		return (int) (client.textRenderer.getWidth(text) * config.timeClockTextSize);
+		return (int) (client.font.width(text) * config.timeClockTextSize);
 	}
 	
 	private int getTimeClockHeight() {
-		MinecraftClient client = MinecraftClient.getInstance();
-		return (int) (client.textRenderer.fontHeight * config.timeClockTextSize);
+		Minecraft client = Minecraft.getInstance();
+		return (int) (client.font.lineHeight * config.timeClockTextSize);
 	}
 	
 	@Override
-	public void close() {
+	public void onClose() {
 		config.save();
-		this.client.setScreen(parent);
+		this.minecraft.setScreen(parent);
 	}
 	
 	@Override
-	public boolean shouldPause() {
+	public boolean isPauseScreen() {
 		return false;
 	}
 }

@@ -3,7 +3,7 @@ package com.simplefps.config;
 import com.simplefps.SimpleFPSClient;
 import com.terraformersmc.modmenu.api.ConfigScreenFactory;
 import com.terraformersmc.modmenu.api.ModMenuApi;
-import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screens.Screen;
 
 /**
  * ModMenu integration for SimpleFPS.

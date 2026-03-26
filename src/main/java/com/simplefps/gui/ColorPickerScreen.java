@@ -1,11 +1,15 @@
 package com.simplefps.gui;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.network.chat.Component;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -32,7 +36,7 @@ public class ColorPickerScreen extends Screen {
 	private int red = 255, green = 255, blue = 255;
 	
 	// Hex input
-	private TextFieldWidget hexField;
+	private EditBox hexField;
 	
 	// Preset colors
 	private static final int[] PRESET_COLORS = {
@@ -52,7 +56,7 @@ public class ColorPickerScreen extends Screen {
 	private boolean wasMouseDown = false;
 	
 	public ColorPickerScreen(Screen parent, String title, String initialColor, Consumer<String> onColorSelected) {
-		super(Text.literal(title));
+		super(Component.literal(title));
 		this.parent = parent;
 		this.title = title;
 		this.onColorSelected = onColorSelected;
@@ -76,31 +80,31 @@ public class ColorPickerScreen extends Screen {
 		wheelCenterY = this.height / 2 - 20;
 		
 		// Hex input field
-		hexField = new TextFieldWidget(
-			this.textRenderer,
+		hexField = new EditBox(
+			this.font,
 			this.width / 2 + 30, this.height / 2 + 60,
 			80, 20,
-			Text.literal("Hex")
+			Component.literal("Hex")
 		);
 		hexField.setMaxLength(7);
-		hexField.setText(getHexColor());
-		hexField.setChangedListener(this::onHexChanged);
-		this.addDrawableChild(hexField);
+		hexField.setValue(getHexColor());
+		hexField.setResponder(this::onHexChanged);
+		this.addRenderableWidget(hexField);
 		
 		// Apply button
-		this.addDrawableChild(ButtonWidget.builder(
-			Text.literal("Apply"),
+		this.addRenderableWidget(Button.builder(
+			Component.literal("Apply"),
 			button -> {
 				onColorSelected.accept(getHexColor());
-				this.client.setScreen(parent);
+				this.minecraft.setScreen(parent);
 			}
-		).dimensions(this.width / 2 - 102, this.height - 30, 100, 20).build());
+		).bounds(this.width / 2 - 102, this.height - 30, 100, 20).build());
 		
 		// Cancel button
-		this.addDrawableChild(ButtonWidget.builder(
-			Text.literal("Cancel"),
-			button -> this.client.setScreen(parent)
-		).dimensions(this.width / 2 + 2, this.height - 30, 100, 20).build());
+		this.addRenderableWidget(Button.builder(
+			Component.literal("Cancel"),
+			button -> this.minecraft.setScreen(parent)
+		).bounds(this.width / 2 + 2, this.height - 30, 100, 20).build());
 	}
 	
 	private void onHexChanged(String hex) {
@@ -119,12 +123,17 @@ public class ColorPickerScreen extends Screen {
 	}
 	
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	//? if >=26.1 {
+	public void extractRenderState(GuiGraphicsExtractor context, int mouseX, int mouseY, float delta) {
+		this.extractBackground(context, mouseX, mouseY, delta);
+	//?} else {
+	/*public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		this.renderBackground(context, mouseX, mouseY, delta);
+	*///?}
 		
 		// Handle mouse input using GLFW
-		MinecraftClient client = MinecraftClient.getInstance();
-		long windowHandle = client.getWindow().getHandle();
+		Minecraft client = Minecraft.getInstance();
+		long windowHandle = minecraft.getWindow().handle();
 		boolean isMouseDown = GLFW.glfwGetMouseButton(windowHandle, GLFW.GLFW_MOUSE_BUTTON_LEFT) == GLFW.GLFW_PRESS;
 		
 		// Detect mouse click start
@@ -145,7 +154,11 @@ public class ColorPickerScreen extends Screen {
 		wasMouseDown = isMouseDown;
 		
 		// Title
-		context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 20, 0xFFFFFF);
+		//? if >=26.1 {
+		context.centeredText(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+		//?} else {
+		/*context.drawCenteredString(this.font, this.title, this.width / 2, 20, 0xFFFFFF);
+		*///?}
 		
 		// Draw color wheel
 		drawColorWheel(context);
@@ -166,12 +179,22 @@ public class ColorPickerScreen extends Screen {
 		context.fill(previewX, previewY, previewX + 80, previewY + 40, 0xFF000000 | (red << 16) | (green << 8) | blue);
 		
 		// Hex label
-		context.drawTextWithShadow(this.textRenderer, "Hex:", previewX, previewY + 50, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(this.font, "Hex:", previewX, previewY + 50, 0xFFFFFF);
+		
+		super.extractRenderState(context, mouseX, mouseY, delta);
+		//?} else {
+		/*context.drawString(this.font, "Hex:", previewX, previewY + 50, 0xFFFFFF);
 		
 		super.render(context, mouseX, mouseY, delta);
+		*///?}
 	}
 	
-	private void drawColorWheel(DrawContext context) {
+	//? if >=26.1 {
+	private void drawColorWheel(GuiGraphicsExtractor context) {
+	//?} else {
+	/*private void drawColorWheel(GuiGraphics context) {
+	*///?}
 		// Draw the color wheel using small rectangles (approximation)
 		for (int y = -wheelRadius; y <= wheelRadius; y++) {
 			for (int x = -wheelRadius; x <= wheelRadius; x++) {
@@ -194,7 +217,11 @@ public class ColorPickerScreen extends Screen {
 		context.fill(selX - 2, selY - 2, selX + 2, selY + 2, 0xFF000000);
 	}
 	
-	private void drawValueBar(DrawContext context) {
+	//? if >=26.1 {
+	private void drawValueBar(GuiGraphicsExtractor context) {
+	//?} else {
+	/*private void drawValueBar(GuiGraphics context) {
+	*///?}
 		int barX = wheelCenterX + wheelRadius + 15;
 		int barY = wheelCenterY - wheelRadius;
 		int barWidth = 15;
@@ -212,13 +239,21 @@ public class ColorPickerScreen extends Screen {
 		context.fill(barX - 2, selY - 2, barX + barWidth + 2, selY + 2, 0xFFFFFFFF);
 	}
 	
-	private void drawPresetColors(DrawContext context, int mouseX, int mouseY) {
+	//? if >=26.1 {
+	private void drawPresetColors(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+	//?} else {
+	/*private void drawPresetColors(GuiGraphics context, int mouseX, int mouseY) {
+	*///?}
 		int startX = this.width / 2 - 100;
 		int startY = this.height - 70;
 		int size = 12;
 		int cols = 10;
 		
-		context.drawTextWithShadow(this.textRenderer, "Presets:", startX, startY - 12, 0xAAAAAA);
+		//? if >=26.1 {
+		context.text(this.font, "Presets:", startX, startY - 12, 0xAAAAAA);
+		//?} else {
+		/*context.drawString(this.font, "Presets:", startX, startY - 12, 0xAAAAAA);
+		*///?}
 		
 		for (int i = 0; i < PRESET_COLORS.length; i++) {
 			int x = startX + (i % cols) * (size + 2);
@@ -231,7 +266,11 @@ public class ColorPickerScreen extends Screen {
 		}
 	}
 	
-	private void drawRgbSliders(DrawContext context, int mouseX, int mouseY) {
+	//? if >=26.1 {
+	private void drawRgbSliders(GuiGraphicsExtractor context, int mouseX, int mouseY) {
+	//?} else {
+	/*private void drawRgbSliders(GuiGraphics context, int mouseX, int mouseY) {
+	*///?}
 		int sliderX = this.width / 2 + 30;
 		int sliderY = this.height / 2 - 80;
 		int sliderWidth = 100;
@@ -239,22 +278,50 @@ public class ColorPickerScreen extends Screen {
 		int spacing = 20;
 		
 		// Red slider
-		context.drawTextWithShadow(this.textRenderer, "R:", sliderX - 15, sliderY + 2, 0xFF5555);
+		//? if >=26.1 {
+		context.text(this.font, "R:", sliderX - 15, sliderY + 2, 0xFF5555);
+		//?} else {
+		/*context.drawString(this.font, "R:", sliderX - 15, sliderY + 2, 0xFF5555);
+		*///?}
 		drawSlider(context, sliderX, sliderY, sliderWidth, sliderHeight, red / 255f, 0xFF0000);
-		context.drawTextWithShadow(this.textRenderer, String.valueOf(red), sliderX + sliderWidth + 5, sliderY + 2, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(this.font, String.valueOf(red), sliderX + sliderWidth + 5, sliderY + 2, 0xFFFFFF);
+		//?} else {
+		/*context.drawString(this.font, String.valueOf(red), sliderX + sliderWidth + 5, sliderY + 2, 0xFFFFFF);
+		*///?}
 		
 		// Green slider
-		context.drawTextWithShadow(this.textRenderer, "G:", sliderX - 15, sliderY + spacing + 2, 0x55FF55);
+		//? if >=26.1 {
+		context.text(this.font, "G:", sliderX - 15, sliderY + spacing + 2, 0x55FF55);
+		//?} else {
+		/*context.drawString(this.font, "G:", sliderX - 15, sliderY + spacing + 2, 0x55FF55);
+		*///?}
 		drawSlider(context, sliderX, sliderY + spacing, sliderWidth, sliderHeight, green / 255f, 0x00FF00);
-		context.drawTextWithShadow(this.textRenderer, String.valueOf(green), sliderX + sliderWidth + 5, sliderY + spacing + 2, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(this.font, String.valueOf(green), sliderX + sliderWidth + 5, sliderY + spacing + 2, 0xFFFFFF);
+		//?} else {
+		/*context.drawString(this.font, String.valueOf(green), sliderX + sliderWidth + 5, sliderY + spacing + 2, 0xFFFFFF);
+		*///?}
 		
 		// Blue slider
-		context.drawTextWithShadow(this.textRenderer, "B:", sliderX - 15, sliderY + spacing * 2 + 2, 0x5555FF);
+		//? if >=26.1 {
+		context.text(this.font, "B:", sliderX - 15, sliderY + spacing * 2 + 2, 0x5555FF);
+		//?} else {
+		/*context.drawString(this.font, "B:", sliderX - 15, sliderY + spacing * 2 + 2, 0x5555FF);
+		*///?}
 		drawSlider(context, sliderX, sliderY + spacing * 2, sliderWidth, sliderHeight, blue / 255f, 0x0000FF);
-		context.drawTextWithShadow(this.textRenderer, String.valueOf(blue), sliderX + sliderWidth + 5, sliderY + spacing * 2 + 2, 0xFFFFFF);
+		//? if >=26.1 {
+		context.text(this.font, String.valueOf(blue), sliderX + sliderWidth + 5, sliderY + spacing * 2 + 2, 0xFFFFFF);
+		//?} else {
+		/*context.drawString(this.font, String.valueOf(blue), sliderX + sliderWidth + 5, sliderY + spacing * 2 + 2, 0xFFFFFF);
+		*///?}
 	}
 	
-	private void drawSlider(DrawContext context, int x, int y, int width, int height, float sliderValue, int color) {
+	//? if >=26.1 {
+	private void drawSlider(GuiGraphicsExtractor context, int x, int y, int width, int height, float sliderValue, int color) {
+	//?} else {
+	/*private void drawSlider(GuiGraphics context, int x, int y, int width, int height, float sliderValue, int color) {
+	*///?}
 		// Background
 		context.fill(x, y, x + width, y + height, 0xFF404040);
 		// Filled portion
@@ -266,7 +333,11 @@ public class ColorPickerScreen extends Screen {
 		context.fill(handleX - 2, y - 1, handleX + 2, y + height + 1, 0xFFFFFFFF);
 	}
 	
-	private void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {
+	//? if >=26.1 {
+	private void drawBorder(GuiGraphicsExtractor context, int x, int y, int width, int height, int color) {
+	//?} else {
+	/*private void drawBorder(GuiGraphics context, int x, int y, int width, int height, int color) {
+	*///?}
 		context.fill(x, y, x + width, y + 1, color); // Top
 		context.fill(x, y + height - 1, x + width, y + height, color); // Bottom
 		context.fill(x, y, x + 1, y + height, color); // Left
@@ -307,7 +378,7 @@ public class ColorPickerScreen extends Screen {
 				green = (color >> 8) & 0xFF;
 				blue = color & 0xFF;
 				rgbToHsv();
-				hexField.setText(getHexColor());
+				hexField.setValue(getHexColor());
 				return;
 			}
 		}
@@ -373,7 +444,7 @@ public class ColorPickerScreen extends Screen {
 		saturation = (float) (distance / wheelRadius);
 		
 		hsvToRgb();
-		hexField.setText(getHexColor());
+		hexField.setValue(getHexColor());
 	}
 	
 	private void updateFromValueBar(double mouseY) {
@@ -382,25 +453,25 @@ public class ColorPickerScreen extends Screen {
 		value = 1f - (float) Math.max(0, Math.min(barHeight, mouseY - barY)) / barHeight;
 		
 		hsvToRgb();
-		hexField.setText(getHexColor());
+		hexField.setValue(getHexColor());
 	}
 	
 	private void updateRedSlider(double mouseX, int sliderX, int sliderWidth) {
 		red = (int) (Math.max(0, Math.min(1, (mouseX - sliderX) / sliderWidth)) * 255);
 		rgbToHsv();
-		hexField.setText(getHexColor());
+		hexField.setValue(getHexColor());
 	}
 	
 	private void updateGreenSlider(double mouseX, int sliderX, int sliderWidth) {
 		green = (int) (Math.max(0, Math.min(1, (mouseX - sliderX) / sliderWidth)) * 255);
 		rgbToHsv();
-		hexField.setText(getHexColor());
+		hexField.setValue(getHexColor());
 	}
 	
 	private void updateBlueSlider(double mouseX, int sliderX, int sliderWidth) {
 		blue = (int) (Math.max(0, Math.min(1, (mouseX - sliderX) / sliderWidth)) * 255);
 		rgbToHsv();
-		hexField.setText(getHexColor());
+		hexField.setValue(getHexColor());
 	}
 	
 	private void rgbToHsv() {
@@ -460,7 +531,7 @@ public class ColorPickerScreen extends Screen {
 	}
 	
 	@Override
-	public void close() {
-		this.client.setScreen(parent);
+	public void onClose() {
+		this.minecraft.setScreen(parent);
 	}
 }

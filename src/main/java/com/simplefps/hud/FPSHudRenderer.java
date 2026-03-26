@@ -1,15 +1,24 @@
 package com.simplefps.hud;
 
 import com.simplefps.config.SimpleFPSConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.util.math.Direction;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.DeltaTracker;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.DeltaTracker;
+*///?}
+import net.minecraft.core.Direction;
 
 public class FPSHudRenderer {
 	
-	public static void render(DrawContext context, RenderTickCounter tickCounter) {
+	//? if >=26.1 {
+	public static void render(GuiGraphicsExtractor context, DeltaTracker tickCounter) {
+	//?} else {
+	/*public static void render(GuiGraphics context, DeltaTracker tickCounter) {
+	*///?}
 		SimpleFPSConfig config = SimpleFPSConfig.getInstance();
 		
 		// Don't render if disabled
@@ -25,7 +34,11 @@ public class FPSHudRenderer {
 	 * @param context The draw context
 	 * @param isPreview If true, shows "Drag me!" indicator
 	 */
-	public static void renderFPS(DrawContext context, boolean isPreview) {
+	//? if >=26.1 {
+	public static void renderFPS(GuiGraphicsExtractor context, boolean isPreview) {
+	//?} else {
+	/*public static void renderFPS(GuiGraphics context, boolean isPreview) {
+	*///?}
 		renderFPSWithConfig(context, SimpleFPSConfig.getInstance(), isPreview);
 	}
 	
@@ -35,12 +48,16 @@ public class FPSHudRenderer {
 	 * @param config The config to use for rendering
 	 * @param isPreview If true, shows "Drag me!" indicator
 	 */
-	public static void renderFPSWithConfig(DrawContext context, SimpleFPSConfig config, boolean isPreview) {
-		MinecraftClient client = MinecraftClient.getInstance();
-		TextRenderer textRenderer = client.textRenderer;
+	//? if >=26.1 {
+	public static void renderFPSWithConfig(GuiGraphicsExtractor context, SimpleFPSConfig config, boolean isPreview) {
+	//?} else {
+	/*public static void renderFPSWithConfig(GuiGraphics context, SimpleFPSConfig config, boolean isPreview) {
+	*///?}
+		Minecraft client = Minecraft.getInstance();
+		Font font = client.font;
 		
 		// Get current FPS from client
-		int fps = client.getCurrentFps();
+		int fps = client.getFps();
 		
 		// Build display text
 		StringBuilder textBuilder = new StringBuilder();
@@ -60,12 +77,12 @@ public class FPSHudRenderer {
 		
 		// Calculate text dimensions with scaling
 		float scale = config.textSize;
-		int textWidth = (int) (textRenderer.getWidth(fpsText) * scale);
-		int textHeight = (int) (textRenderer.fontHeight * scale);
+		int textWidth = (int) (font.width(fpsText) * scale);
+		int textHeight = (int) (font.lineHeight * scale);
 		
 		// Get position (scaled and clamped to screen bounds)
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
+		int screenWidth = client.getWindow().getGuiScaledWidth();
+		int screenHeight = client.getWindow().getGuiScaledHeight();
 		
 		int x = Math.max(0, Math.min(config.getScaledPositionX(screenWidth), screenWidth - textWidth - 4));
 		int y = Math.max(0, Math.min(config.getScaledPositionY(screenHeight), screenHeight - textHeight - 4));
@@ -93,32 +110,28 @@ public class FPSHudRenderer {
 			textColor = config.getTextColorWithAlpha();
 		}
 		
-		// Draw text with scaling using DrawContext's scale method
+		// Draw text with scaling using GuiGraphics's scale method
 		if (scale != 1.0f) {
 			// Scale around the text position
-			context.getMatrices().pushMatrix();
-			context.getMatrices().translate(x, y);
-			context.getMatrices().scale(scale, scale);
+			context.pose().pushMatrix();
+			context.pose().translate(x, y);
+			context.pose().scale(scale, scale);
 			
 			// Draw text with shadow for better visibility
-			context.drawTextWithShadow(
-				textRenderer,
-				fpsText,
-				0,
-				0,
-				textColor
-			);
+			//? if >=26.1 {
+			context.text(font, fpsText, 0, 0, textColor);
+			//?} else {
+			/*context.drawString(font, fpsText, 0, 0, textColor);
+			*///?}
 			
-			context.getMatrices().popMatrix();
+			context.pose().popMatrix();
 		} else {
 			// No scaling needed, draw directly
-			context.drawTextWithShadow(
-				textRenderer,
-				fpsText,
-				x,
-				y,
-				textColor
-			);
+			//? if >=26.1 {
+			context.text(font, fpsText, x, y, textColor);
+			//?} else {
+			/*context.drawString(font, fpsText, x, y, textColor);
+			*///?}
 		}
 		
 	}
@@ -127,10 +140,10 @@ public class FPSHudRenderer {
 	/**
 	 * Gets the player's current facing direction as a single letter.
 	 */
-	private static String getPlayerDirection(MinecraftClient client) {
+	private static String getPlayerDirection(Minecraft client) {
 		if (client.player == null) return "";
 		
-		Direction direction = client.player.getHorizontalFacing();
+		Direction direction = client.player.getDirection();
 		return switch (direction) {
 			case NORTH -> "N";
 			case SOUTH -> "S";

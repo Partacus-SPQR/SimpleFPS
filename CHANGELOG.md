@@ -2,6 +2,19 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
+## [1.4.0] - 2026-03-25
+
+### Added
+- **Minecraft 26.1 Support** - Full compatibility with Minecraft 26.1 (unobfuscated builds)
+  - Java 25 support for 26.1 builds
+  - Adapted to new 26.1 rendering API (`GuiGraphicsExtractor`, `extractRenderState`, `text`/`centeredText`)
+  - Migrated from `HudRenderCallback` to `HudElementRegistry`/`HudElement` API for 26.1
+  - Updated key binding API to `fabric-key-mapping-api-v1` for 26.1
+  - Updated time display to use new `getDefaultClockTime()` API
+
+### Changed
+- Now supports 4 Minecraft versions: 1.21.9, 1.21.10, 1.21.11, and 26.1
+
 ## [1.3.1] - 2025-12-19
 
 ### Fixed

@@ -1,9 +1,13 @@
 package com.simplefps.hud;
 
 import com.simplefps.config.SimpleFPSConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
 
 /**
  * Renders the time clock display showing Minecraft day and time.
@@ -22,31 +26,35 @@ public class TimeClockRenderer {
 	 * @param context The draw context
 	 * @param isPreview If true, shows preview mode
 	 */
-	public static void render(DrawContext context, boolean isPreview) {
+	//? if >=26.1 {
+	public static void render(GuiGraphicsExtractor context, boolean isPreview) {
+	//?} else {
+	/*public static void render(GuiGraphics context, boolean isPreview) {
+	*///?}
 		SimpleFPSConfig config = SimpleFPSConfig.getInstance();
 		
 		if (!config.timeClockEnabled && !isPreview) {
 			return;
 		}
 		
-		MinecraftClient client = MinecraftClient.getInstance();
-		if (client.player == null || client.world == null) {
+		Minecraft client = Minecraft.getInstance();
+		if (client.player == null || client.level == null) {
 			return;
 		}
 		
-		TextRenderer textRenderer = client.textRenderer;
+		Font font = client.font;
 		
 		// Get current time and day - pass world directly to ensure fresh reference
-		String timeText = formatTimeDisplay(client.world, config);
+		String timeText = formatTimeDisplay(client.level, config);
 		
 		// Calculate text dimensions with scaling
 		float scale = config.timeClockTextSize;
-		int textWidth = (int) (textRenderer.getWidth(timeText) * scale);
-		int textHeight = (int) (textRenderer.fontHeight * scale);
+		int textWidth = (int) (font.width(timeText) * scale);
+		int textHeight = (int) (font.lineHeight * scale);
 		
 		// Get position (scaled and clamped to screen bounds)
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
+		int screenWidth = client.getWindow().getGuiScaledWidth();
+		int screenHeight = client.getWindow().getGuiScaledHeight();
 		
 		int x = Math.max(0, Math.min(config.getScaledTimeClockX(screenWidth), screenWidth - textWidth - 4));
 		int y = Math.max(0, Math.min(config.getScaledTimeClockY(screenHeight), screenHeight - textHeight - 4));
@@ -69,26 +77,39 @@ public class TimeClockRenderer {
 		
 		// Draw text with scaling
 		if (scale != 1.0f) {
-			context.getMatrices().pushMatrix();
-			context.getMatrices().translate(x, y);
-			context.getMatrices().scale(scale, scale);
-			context.drawTextWithShadow(textRenderer, timeText, 0, 0, textColor);
-			context.getMatrices().popMatrix();
+			context.pose().pushMatrix();
+			context.pose().translate(x, y);
+			context.pose().scale(scale, scale);
+			//? if >=26.1 {
+			context.text(font, timeText, 0, 0, textColor);
+			//?} else {
+			/*context.drawString(font, timeText, 0, 0, textColor);
+			*///?}
+			context.pose().popMatrix();
 		} else {
-			context.drawTextWithShadow(textRenderer, timeText, x, y, textColor);
+			//? if >=26.1 {
+			context.text(font, timeText, x, y, textColor);
+			//?} else {
+			/*context.drawString(font, timeText, x, y, textColor);
+			*///?}
 		}
 	}
 	
 	/**
 	 * Formats the time display based on config settings.
 	 */
-	private static String formatTimeDisplay(net.minecraft.client.world.ClientWorld world, SimpleFPSConfig config) {
+	private static String formatTimeDisplay(net.minecraft.client.multiplayer.ClientLevel world, SimpleFPSConfig config) {
 		// Get the current time of day directly from the world
-		// getTimeOfDay() returns the time within the current day (0-23999)
-		long timeOfDay = world.getTimeOfDay();
+		//? if >=26.1 {
+		long timeOfDay = world.getDefaultClockTime();
+		long totalTime = world.getDefaultClockTime();
+		//?} else {
+		/*// getDayTime() returns the time within the current day (0-23999)
+		long timeOfDay = world.getDayTime();
 		
 		// Get total time for day calculation
-		long totalTime = world.getTime();
+		long totalTime = world.getGameTime();
+		*///?}
 		
 		// Calculate day number (days start at 1)
 		long dayNumber = (totalTime / 24000L) + 1;

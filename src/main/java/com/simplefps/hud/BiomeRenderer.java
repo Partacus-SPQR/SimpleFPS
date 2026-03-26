@@ -1,12 +1,16 @@
 package com.simplefps.hud;
 
 import com.simplefps.config.SimpleFPSConfig;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+//? if >=26.1 {
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+//?} else {
+/*import net.minecraft.client.gui.GuiGraphics;
+*///?}
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.biome.Biome;
 
 import java.util.Optional;
 
@@ -17,31 +21,35 @@ public class BiomeRenderer {
 	 * @param context The draw context
 	 * @param isPreview If true, shows "Drag me!" indicator
 	 */
-	public static void render(DrawContext context, boolean isPreview) {
+	//? if >=26.1 {
+	public static void render(GuiGraphicsExtractor context, boolean isPreview) {
+	//?} else {
+	/*public static void render(GuiGraphics context, boolean isPreview) {
+	*///?}
 		SimpleFPSConfig config = SimpleFPSConfig.getInstance();
 		
 		if (!config.biomeEnabled && !isPreview) {
 			return;
 		}
 		
-		MinecraftClient client = MinecraftClient.getInstance();
-		if (client.player == null || client.world == null) {
+		Minecraft client = Minecraft.getInstance();
+		if (client.player == null || client.level == null) {
 			return;
 		}
 		
-		TextRenderer textRenderer = client.textRenderer;
+		Font font = client.font;
 		
 		// Get current biome
 		String biomeText = getCurrentBiome(client);
 		
 		// Calculate text dimensions with scaling
 		float scale = config.biomeTextSize;
-		int textWidth = (int) (textRenderer.getWidth(biomeText) * scale);
-		int textHeight = (int) (textRenderer.fontHeight * scale);
+		int textWidth = (int) (font.width(biomeText) * scale);
+		int textHeight = (int) (font.lineHeight * scale);
 		
 		// Get position (scaled and clamped to screen bounds)
-		int screenWidth = client.getWindow().getScaledWidth();
-		int screenHeight = client.getWindow().getScaledHeight();
+		int screenWidth = client.getWindow().getGuiScaledWidth();
+		int screenHeight = client.getWindow().getGuiScaledHeight();
 		
 		int x = Math.max(0, Math.min(config.getScaledBiomeX(screenWidth), screenWidth - textWidth - 4));
 		int y = Math.max(0, Math.min(config.getScaledBiomeY(screenHeight), screenHeight - textHeight - 4));
@@ -64,13 +72,21 @@ public class BiomeRenderer {
 		
 		// Draw text with scaling
 		if (scale != 1.0f) {
-			context.getMatrices().pushMatrix();
-			context.getMatrices().translate(x, y);
-			context.getMatrices().scale(scale, scale);
-			context.drawTextWithShadow(textRenderer, biomeText, 0, 0, textColor);
-			context.getMatrices().popMatrix();
+			context.pose().pushMatrix();
+			context.pose().translate(x, y);
+			context.pose().scale(scale, scale);
+			//? if >=26.1 {
+			context.text(font, biomeText, 0, 0, textColor);
+			//?} else {
+			/*context.drawString(font, biomeText, 0, 0, textColor);
+			*///?}
+			context.pose().popMatrix();
 		} else {
-			context.drawTextWithShadow(textRenderer, biomeText, x, y, textColor);
+			//? if >=26.1 {
+			context.text(font, biomeText, x, y, textColor);
+			//?} else {
+			/*context.drawString(font, biomeText, x, y, textColor);
+			*///?}
 		}
 		
 	}
@@ -79,15 +95,19 @@ public class BiomeRenderer {
 	/**
 	 * Gets the current biome name formatted nicely.
 	 */
-	private static String getCurrentBiome(MinecraftClient client) {
-		if (client.player == null || client.world == null) return "Unknown";
+	private static String getCurrentBiome(Minecraft client) {
+		if (client.player == null || client.level == null) return "Unknown";
 		
-		BlockPos pos = client.player.getBlockPos();
-		Optional<RegistryKey<Biome>> biomeKey = client.world.getBiome(pos).getKey();
+		BlockPos pos = client.player.blockPosition();
+		Optional<ResourceKey<Biome>> biomeKey = client.level.getBiome(pos).unwrapKey();
 		
 		if (biomeKey.isPresent()) {
 			// Get the biome path and format it nicely
-			String biomePath = biomeKey.get().getValue().getPath();
+			//? if >=1.21.11 {
+			String biomePath = biomeKey.get().identifier().getPath();
+			//?} else {
+			/*String biomePath = biomeKey.get().location().getPath();*/
+			//?}
 			// Convert underscore_case to Title Case
 			String[] words = biomePath.split("_");
 			StringBuilder formatted = new StringBuilder();
