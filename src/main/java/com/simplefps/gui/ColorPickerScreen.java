@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import com.simplefps.compat.ScreenCompat;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -96,14 +97,14 @@ public class ColorPickerScreen extends Screen {
 			Component.literal("Apply"),
 			button -> {
 				onColorSelected.accept(getHexColor());
-				this.minecraft.setScreen(parent);
+				ScreenCompat.open(this.minecraft, parent);
 			}
 		).bounds(this.width / 2 - 102, this.height - 30, 100, 20).build());
 		
 		// Cancel button
 		this.addRenderableWidget(Button.builder(
 			Component.literal("Cancel"),
-			button -> this.minecraft.setScreen(parent)
+			button -> ScreenCompat.open(this.minecraft, parent)
 		).bounds(this.width / 2 + 2, this.height - 30, 100, 20).build());
 	}
 	
@@ -532,6 +533,6 @@ public class ColorPickerScreen extends Screen {
 	
 	@Override
 	public void onClose() {
-		this.minecraft.setScreen(parent);
+		ScreenCompat.open(this.minecraft, parent);
 	}
 }

@@ -13,6 +13,7 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import com.simplefps.compat.ScreenCompat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -152,7 +153,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button textColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.textColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.textColor, color -> {
 					config.textColor = color;
 					textColorField.setValue(color);
 				}));
@@ -198,7 +199,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button bgColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.backgroundColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.backgroundColor, color -> {
 					config.backgroundColor = color;
 					bgColorField.setValue(color);
 				}));
@@ -444,7 +445,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button coordColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.coordinatesTextColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.coordinatesTextColor, color -> {
 					config.coordinatesTextColor = color;
 					coordColorField.setValue(color);
 				}));
@@ -490,7 +491,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button coordBgColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.coordinatesBackgroundColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.coordinatesBackgroundColor, color -> {
 					config.coordinatesBackgroundColor = color;
 					coordBgColorField.setValue(color);
 				}));
@@ -569,7 +570,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button biomeColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.biomeTextColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.biomeTextColor, color -> {
 					config.biomeTextColor = color;
 					biomeColorField.setValue(color);
 				}));
@@ -615,7 +616,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button biomeBgColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.biomeBackgroundColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.biomeBackgroundColor, color -> {
 					config.biomeBackgroundColor = color;
 					biomeBgColorField.setValue(color);
 				}));
@@ -734,7 +735,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button timeClockColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.timeClockTextColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.timeClockTextColor, color -> {
 					config.timeClockTextColor = color;
 					timeClockColorField.setValue(color);
 				}));
@@ -780,7 +781,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		Button timeClockBgColorPick = Button.builder(
 			Component.literal("Pick"),
 			button -> {
-				minecraft.setScreen(new ColorPickerScreen(this, config.timeClockBackgroundColor, color -> {
+				ScreenCompat.open(minecraft, new ColorPickerScreen(this,config.timeClockBackgroundColor, color -> {
 					config.timeClockBackgroundColor = color;
 					timeClockBgColorField.setValue(color);
 				}));
@@ -857,7 +858,7 @@ public class SimpleFPSConfigScreen extends Screen {
 		addRenderableWidget(Button.builder(
 			Component.literal("Key Binds"),
 			button -> {
-				minecraft.setScreen(new KeyBindsScreen(this, minecraft.options));
+				ScreenCompat.open(minecraft, new KeyBindsScreen(this, minecraft.options));
 			}
 		).bounds(buttonStartX + bottomButtonWidth + buttonGap, bottomY, bottomButtonWidth, 20).build());
 		
@@ -1038,7 +1039,7 @@ public class SimpleFPSConfigScreen extends Screen {
 	
 	@Override
 	public void onClose() {
-		minecraft.setScreen(parent);
+		ScreenCompat.open(minecraft, parent);
 	}
 	
 	// =====================================================================
