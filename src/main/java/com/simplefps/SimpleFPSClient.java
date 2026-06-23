@@ -7,6 +7,7 @@ import com.simplefps.hud.FPSHudRenderer;
 import com.simplefps.hud.CoordinatesRenderer;
 import com.simplefps.hud.BiomeRenderer;
 import com.simplefps.hud.TimeClockRenderer;
+import com.simplefps.compat.ScreenCompat;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 //? if >=26.1 {
@@ -132,19 +133,19 @@ public class SimpleFPSClient implements ClientModInitializer {
 			}
 			
 			while (configKeyBinding.consumeClick()) {
-				if (client.screen == null) {
+				if (ScreenCompat.current(client) == null) {
 					try {
 						Class.forName("me.shedaniel.clothconfig2.api.ConfigBuilder");
-						client.setScreen(com.simplefps.config.ModConfigScreen.createConfigScreen(null));
+						ScreenCompat.open(client, com.simplefps.config.ModConfigScreen.createConfigScreen(null));
 					} catch (Throwable e) {
-						client.setScreen(new com.simplefps.config.SimpleFPSConfigScreen(null));
+						ScreenCompat.open(client, new com.simplefps.config.SimpleFPSConfigScreen(null));
 					}
 				}
 			}
-			
+
 			while (dragKeyBinding.consumeClick()) {
-				if (client.screen == null) {
-					client.setScreen(new HudDragScreen(null));
+				if (ScreenCompat.current(client) == null) {
+					ScreenCompat.open(client, new HudDragScreen(null));
 				}
 			}
 			

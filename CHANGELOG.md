@@ -2,6 +2,18 @@
 
 All notable changes to SimpleFPS will be documented in this file.
 
+## [1.5.0] - 2026-06-23
+
+### Added
+- **Minecraft 26.2 Support** - Full compatibility with Minecraft 26.2 (unobfuscated builds, Java 25)
+  - Adapted to the relocated screen API: `Minecraft.setScreen()` is now `Minecraft.setScreenAndShow()`, and the active screen is read via `Minecraft.gui.screen()`
+  - Added a `ScreenCompat` helper that bridges the 26.2 and earlier screen APIs from a single location, keeping all other versions unchanged
+
+### Changed
+- Now supports 5 Minecraft versions: 1.21.9, 1.21.10, 1.21.11, 26.1, and 26.2
+- 26.2 is now the primary build target
+- Updated dependencies for 26.2: Fabric API `0.153.0+26.2`, Mod Menu `20.0.0-beta.4`
+
 ## [1.4.0] - 2026-03-25
 
 ### Added

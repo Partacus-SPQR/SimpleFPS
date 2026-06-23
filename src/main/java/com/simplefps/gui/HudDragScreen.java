@@ -14,6 +14,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 *///?}
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import com.simplefps.compat.ScreenCompat;
 import org.lwjgl.glfw.GLFW;
 
 /**
@@ -341,7 +342,7 @@ public class HudDragScreen extends Screen {
 	@Override
 	public void onClose() {
 		config.save();
-		this.minecraft.setScreen(parent);
+		ScreenCompat.open(this.minecraft, parent);
 	}
 	
 	@Override

@@ -10,6 +10,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
+import com.simplefps.compat.ScreenCompat;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.function.Consumer;
@@ -140,7 +141,7 @@ public class ColorPickerScreen extends Screen {
 	@Override
 	public void onClose() {
 		if (minecraft != null) {
-			minecraft.setScreen(parent);
+			ScreenCompat.open(minecraft, parent);
 		}
 	}
 	
